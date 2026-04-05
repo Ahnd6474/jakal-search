@@ -15,6 +15,10 @@ class SourceTrustScorer:
         self._prototype_embeddings: np.ndarray | None = None
         self._rejected_embeddings: list[np.ndarray] = []
 
+    def reset(self) -> None:
+        self._prototype_embeddings = None
+        self._rejected_embeddings = []
+
     def score_domain(self, source: str) -> float:
         host = source.lower()
         for suffix, weight in self._config.domain_weights.items():

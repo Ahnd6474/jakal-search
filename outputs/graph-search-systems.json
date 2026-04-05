@@ -1,0 +1,209 @@
+{
+  "root_id": "node-0",
+  "nodes": {
+    "node-0": {
+      "query": "graph search systems",
+      "depth": 0,
+      "parent_id": null,
+      "score": 1.0,
+      "cluster_label": "",
+      "status": "expanded",
+      "stop_reason": null,
+      "children": [
+        "node-1"
+      ],
+      "metrics": {
+        "result_count": 8,
+        "trusted_count": 8,
+        "unique_count": 8
+      },
+      "docs": [
+        {
+          "title": "Graph Search Algorithms: A Practical Overview",
+          "snippet": "Embark on a journey through the intricate landscape of graph search algorithms, from classical uninformed methods like BFS and DFS to informed approaches like Dijkstra's and A*.",
+          "url": "https://www.puppygraph.com/blog/graph-search-algorithms",
+          "source": "puppygraph.com",
+          "query": "graph search systems",
+          "rank": 1,
+          "trust_score": 0.657926077902317,
+          "semantic_risk": 0.06454972177743912
+        },
+        {
+          "title": "Graph Search Algorithms: Developer's Guide",
+          "snippet": "Graph search algorithms form the backbone of many applications, from social network analysis and route planning to data mining and recommendation systems . In this developer's guide, we will delve into the world of graph search algorithms, exploring their definition, significance, and practical applications. At its core, a graph search algorithm is a technique used to traverse a graph , which is ...",
+          "url": "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+          "source": "memgraph.com",
+          "query": "graph search systems",
+          "rank": 2,
+          "trust_score": 0.6636736873388291,
+          "semantic_risk": 0.04402254521846771
+        },
+        {
+          "title": "PDF Graph Search Algorithms - Computer Science",
+          "snippet": "Graph Traversal Algorithms These algorithms specify an order to search through the nodes of a graph . We start at the source node and keep searching until we find the target node. The frontier contains nodes that we've seen but haven't explored yet. Each iteration, we take a node off the frontier, and add its neighbors to the frontier.",
+          "url": "https://cs.stanford.edu/people/abisee/gs.pdf",
+          "source": "cs.stanford.edu",
+          "query": "graph search systems",
+          "rank": 3,
+          "trust_score": 0.9010276296794415,
+          "semantic_risk": 0.044901322573423386
+        },
+        {
+          "title": "The AI Evolution of Graph Search | Netflix TechBlog",
+          "snippet": "Netflix details the evolution of Graph Search using LLMs and RAG. Learn how we converted structured queries into intuitive natural language search .",
+          "url": "https://netflixtechblog.com/the-ai-evolution-of-graph-search-at-netflix-d416ec5b1151",
+          "source": "netflixtechblog.com",
+          "query": "graph search systems",
+          "rank": 4,
+          "trust_score": 0.676,
+          "semantic_risk": 0.0
+        },
+        {
+          "title": "Graph Search - TigerGraph",
+          "snippet": "Explore the power of graph search beyond simple keyword lookups. Learn how this relationship-focused approach enables multi-hop traversals, pattern recognition, and real-time insights across finance, healthcare, retail, cybersecurity, and telecommunications—delivering faster queries and actionable business intelligence from complex, interconnected data.",
+          "url": "https://www.tigergraph.com/glossary/graph-search/",
+          "source": "tigergraph.com",
+          "query": "graph search systems",
+          "rank": 5,
+          "trust_score": 0.6605630989968777,
+          "semantic_risk": 0.05513178929686546
+        },
+        {
+          "title": "Mastering Graph Search Algorithms - numberanalytics.com",
+          "snippet": "Unlock the power of graph search algorithms and discover how they can be applied to real-world problems, from social networks to traffic routing.",
+          "url": "https://www.numberanalytics.com/blog/mastering-graph-search-algorithms",
+          "source": "numberanalytics.com",
+          "query": "graph search systems",
+          "rank": 6,
+          "trust_score": 0.676,
+          "semantic_risk": 0.0
+        },
+        {
+          "title": "Graph Search Problem - an overview | ScienceDirect Topics",
+          "snippet": "The graph search problem is defined as a method for finding the shortest path in a static road network, utilizing algorithms such as the A∗ and Dijkstra algorithms, which evaluate paths based on heuristic estimation to optimize search efficiency.",
+          "url": "https://www.sciencedirect.com/topics/computer-science/graph-search-problem",
+          "source": "sciencedirect.com",
+          "query": "graph search systems",
+          "rank": 7,
+          "trust_score": 0.6541356728076935,
+          "semantic_risk": 0.07808688282966614
+        },
+        {
+          "title": "Key Algorithms - Graph Search Algorithms | Pete Bleackley",
+          "snippet": "Graph Search Algorithms There are many applications in which we might wish to navigate our way through a graph of nodes and edges - route finding for satnav systems , controlling character movement in video games, routing traffic on the Internet, crawling the web for a search engine, or finding information in a vector database, for example.",
+          "url": "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+          "source": "petebleackley.github.io",
+          "query": "graph search systems",
+          "rank": 8,
+          "trust_score": 0.6582199827432633,
+          "semantic_risk": 0.0635000616312027
+        }
+      ]
+    },
+    "node-1": {
+      "query": "graph search systems algorithms search algorithms finding",
+      "depth": 1,
+      "parent_id": "node-0",
+      "score": 0.9732538283301833,
+      "cluster_label": "algorithms, search algorithms, finding",
+      "status": "stopped",
+      "stop_reason": "no_dense_clusters",
+      "children": [],
+      "metrics": {
+        "novelty": 1.0,
+        "trust": 0.666,
+        "scope": 0.6318,
+        "support": 0.375,
+        "vector_consistency": 0.8582,
+        "drift": 0.0915,
+        "keyword_count": 6,
+        "cluster_size": 3,
+        "result_count": 8,
+        "trusted_count": 8,
+        "unique_count": 8
+      },
+      "docs": [
+        {
+          "title": "Graph Search Algorithms: Developer's Guide",
+          "snippet": "Graph search algorithms form the backbone of many applications, from social network analysis and route planning to data mining and recommendation systems . In this developer's guide, we will delve into the world of graph search algorithms , exploring their definition, significance, and practical applications. At its core, a graph search algorithm is a technique used to traverse a graph , which is ...",
+          "url": "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+          "source": "memgraph.com",
+          "query": "graph search systems algorithms search algorithms finding",
+          "rank": 1,
+          "trust_score": 0.6636736873388291,
+          "semantic_risk": 0.04402254521846771
+        },
+        {
+          "title": "Graph Search Algorithms: A Practical Overview",
+          "snippet": "Embark on a journey through the intricate landscape of graph search algorithms , from classical uninformed methods like BFS and DFS to informed approaches like Dijkstra's and A*.",
+          "url": "https://www.puppygraph.com/blog/graph-search-algorithms",
+          "source": "puppygraph.com",
+          "query": "graph search systems algorithms search algorithms finding",
+          "rank": 2,
+          "trust_score": 0.657926077902317,
+          "semantic_risk": 0.06454972177743912
+        },
+        {
+          "title": "PDF Graph Search Algorithms - Computer Science",
+          "snippet": "Graph Traversal Algorithms These algorithms specify an order to search through the nodes of a graph . We start at the source node and keep searching until we find the target node. The frontier contains nodes that we've seen but haven't explored yet. Each iteration, we take a node off the frontier, and add its neighbors to the frontier.",
+          "url": "https://cs.stanford.edu/people/abisee/gs.pdf",
+          "source": "cs.stanford.edu",
+          "query": "graph search systems algorithms search algorithms finding",
+          "rank": 3,
+          "trust_score": 0.9010276296794415,
+          "semantic_risk": 0.044901322573423386
+        },
+        {
+          "title": "Graph Algorithms - Learn Graph Theory",
+          "snippet": "Comprehensive guide to 23+ graph algorithms including BFS, DFS, Dijkstra, MST, and more with complexity analysis and use cases.",
+          "url": "https://learngraphtheory.org/algorithms.html",
+          "source": "learngraphtheory.org",
+          "query": "graph search systems algorithms search algorithms finding",
+          "rank": 4,
+          "trust_score": 0.6547732562422752,
+          "semantic_risk": 0.07580979913473129
+        },
+        {
+          "title": "Graph searching algorithm — algorithms documentation",
+          "snippet": "Graph searching algorithm ¶ In a m*n grid, walk from the most north-west point A to south-east point B, by taking the unit step towards either south or east in equal probability.",
+          "url": "https://algonotes.readthedocs.io/en/latest/Graph-search.html",
+          "source": "algonotes.readthedocs.io",
+          "query": "graph search systems algorithms search algorithms finding",
+          "rank": 5,
+          "trust_score": 0.6581114563941957,
+          "semantic_risk": 0.06388765573501587
+        },
+        {
+          "title": "Graph Algorithms - GeeksforGeeks",
+          "snippet": "Example situations where we use graph data structure are, a social network, a computer network, a network of locations used in GPS and many more examples where different nodes or vertices are connected without any hierarchic or constraint on structure. The following images show different types of graphs that see when solving graph problems.",
+          "url": "https://www.geeksforgeeks.org/dsa/graph-data-structure-and-algorithms/",
+          "source": "geeksforgeeks.org",
+          "query": "graph search systems algorithms search algorithms finding",
+          "rank": 6,
+          "trust_score": 0.6331896326541901,
+          "semantic_risk": 0.15289416909217834
+        },
+        {
+          "title": "Graph algorithms - Graphaware",
+          "snippet": "A graph algorithm is a computational procedure designed to solve problems related to graphs - data structures consisting of nodes (vertices) connected by edges. These algorithms analyse relationships, find optimal paths, detect patterns, and solve optimisation problems in networked data. Examples include shortest path algorithms for navigation, centrality measures for influence analysis, and ...",
+          "url": "https://graphaware.com/glossary/graph-algorithms/",
+          "source": "graphaware.com",
+          "query": "graph search systems algorithms search algorithms finding",
+          "rank": 7,
+          "trust_score": 0.6497755993008614,
+          "semantic_risk": 0.09365857392549515
+        },
+        {
+          "title": "Search Algorithms: Types, Examples & Uses - ait.systems",
+          "snippet": "Search algorithms can be broadly categorized into simple search algorithms (like linear and binary search ) and graph traversal algorithms (such as depth-first and breadth-first searches). Why Search Algorithms Matter? In the digital world, the size of data sets is continuously increasing, driven by social media, e-commerce platforms, and IoT ...",
+          "url": "https://ait.systems/search-algorithms/",
+          "source": "ait.systems",
+          "query": "graph search systems algorithms search algorithms finding",
+          "rank": 8,
+          "trust_score": 0.6507532522678376,
+          "semantic_risk": 0.09016695618629456
+        }
+      ]
+    }
+  }
+}

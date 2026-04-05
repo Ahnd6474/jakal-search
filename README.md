@@ -27,3 +27,12 @@ pip install -e .[dev,models]
 - `sentence-transformers` is optional. If it is not installed, the engine falls back to a lightweight hashing embedder.
 - `hdbscan` is optional. If it is not installed, the engine falls back to `DBSCAN`.
 - The bundled CLI uses DuckDuckGo's HTML endpoint as a simple provider.
+
+## Output Formats
+
+```bash
+python -m jakal_search "graph search systems" --format report
+python -m jakal_search "graph search systems" --format urls
+python -m jakal_search "graph search systems" --format tree
+python -m jakal_search "graph search systems" --format json
+```

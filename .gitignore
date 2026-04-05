@@ -12,3 +12,4 @@ dist/
 .parallel_runs/
 .lineages/
 jakal-flow-logs/
+.idea

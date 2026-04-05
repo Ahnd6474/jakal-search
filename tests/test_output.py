@@ -3,8 +3,9 @@ from __future__ import annotations
 import numpy as np
 
 from jakal_search.config import EngineConfig
-from jakal_search.engine import SearchTreeEngine, SimilarityDeduper
-from jakal_search.types import DocumentMemoryItem, SearchDocument
+from jakal_search.engine import SearchTreeEngine
+from jakal_search.output import render_json, render_report, render_tree, render_urls
+from jakal_search.types import SearchDocument
 from jakal_search.utils import normalize_rows
 
 
@@ -84,39 +85,7 @@ TRACKING_DOCS = [
 ]
 
 
-def test_deduper_keeps_parent_similar_docs_but_blocks_external_duplicates() -> None:
-    deduper = SimilarityDeduper(threshold=0.9)
-    docs = [
-        make_doc("policy item", "acm.org", "root"),
-        make_doc("policy copy", "acm.org", "root"),
-    ]
-    embeddings = normalize_rows(
-        np.asarray(
-            [
-                [1.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0],
-            ],
-            dtype=np.float32,
-        )
-    )
-    memory = [
-        DocumentMemoryItem(node_id="parent", url="https://acm.org/parent", embedding=embeddings[0]),
-        DocumentMemoryItem(node_id="sibling", url="https://acm.org/sibling", embedding=embeddings[1]),
-    ]
-
-    kept_docs, kept_vectors = deduper.dedupe(
-        docs=docs,
-        embeddings=embeddings,
-        ancestry_ids={"parent", "current"},
-        memory=memory,
-    )
-
-    assert len(kept_docs) == 1
-    assert kept_docs[0].title == "policy item"
-    assert kept_vectors.shape[0] == 1
-
-
-def test_engine_builds_subtopics_and_filters_low_trust_noise() -> None:
+def make_tree():
     config = EngineConfig()
     config.limits.max_depth = 2
     config.limits.min_results = 3
@@ -127,61 +96,33 @@ def test_engine_builds_subtopics_and_filters_low_trust_noise() -> None:
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
-    tree = engine.run("search system")
-
-    root = tree.nodes[tree.root_id]
-    child_queries = {tree.nodes[child_id].query for child_id in root.children}
-
-    assert root.status == "expanded"
-    assert len(root.children) == 2
-    assert any("policy" in query for query in child_queries)
-    assert any("vector" in query or "tracking" in query for query in child_queries)
-    assert all("miracle" not in doc.title for doc in root.docs)
+    return engine.run("search system")
 
 
-def test_max_depth_stops_expansion() -> None:
-    config = EngineConfig()
-    config.limits.max_depth = 1
-    config.limits.min_results = 3
-    config.limits.min_cluster_size = 3
-    config.limits.results_per_query = 8
-    config.similarity.dedupe_threshold = 0.995
-    config.similarity.scope_threshold = 0.2
+def test_render_report_groups_results_by_topic() -> None:
+    report = render_report(make_tree())
 
-    engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
-    tree = engine.run("search system")
-
-    for child_id in tree.nodes[tree.root_id].children:
-        assert tree.nodes[child_id].depth == 1
-        assert tree.nodes[child_id].status in {"pending", "pruned", "stopped"}
+    assert "Query: search system" in report
+    assert "Summary" in report
+    assert "Topics" in report
+    assert "policy" in report.lower()
+    assert "vector" in report.lower()
+    assert "Sources" in report
 
 
-def test_engine_reuse_resets_run_state() -> None:
-    config = EngineConfig()
-    config.limits.max_depth = 2
-    config.limits.min_results = 3
-    config.limits.min_cluster_size = 3
-    config.limits.max_children_per_node = 2
-    config.limits.results_per_query = 8
-    config.similarity.dedupe_threshold = 0.995
-    config.similarity.scope_threshold = 0.2
+def test_render_urls_returns_unique_urls() -> None:
+    urls = render_urls(make_tree()).splitlines()
 
-    engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
+    assert urls
+    assert len(urls) == len(set(urls))
+    assert any("acm.org" in url for url in urls)
+    assert any("arxiv.org" in url for url in urls)
 
-    first_tree = engine.run("search system")
-    second_tree = engine.run("search system")
 
-    first_root = first_tree.nodes[first_tree.root_id]
-    second_root = second_tree.nodes[second_tree.root_id]
-    first_queries = {first_tree.nodes[child_id].query for child_id in first_root.children}
-    second_queries = {second_tree.nodes[child_id].query for child_id in second_root.children}
+def test_render_tree_and_json_keep_existing_views() -> None:
+    tree = make_tree()
+    tree_output = render_tree(tree)
+    json_output = render_json(tree)
 
-    assert first_tree.root_id == "node-0"
-    assert second_tree.root_id == "node-0"
-    assert first_root.status == "expanded"
-    assert second_root.status == "expanded"
-    assert first_root.stop_reason is None
-    assert second_root.stop_reason is None
-    assert len(first_root.children) == 2
-    assert len(second_root.children) == 2
-    assert first_queries == second_queries
+    assert "- node-0: search system" in tree_output
+    assert '"root_id": "node-0"' in json_output

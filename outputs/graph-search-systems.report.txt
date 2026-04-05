@@ -1,0 +1,26 @@
+Query: graph search systems
+
+Summary
+- Found 13 unique documents across 1 topic(s).
+- Top topics: algorithms, search algorithms, finding.
+- Most common sources: cs.stanford.edu (1), netflixtechblog.com (1), numberanalytics.com (1).
+
+Topics
+1. algorithms, search algorithms, finding
+   Query: graph search systems algorithms search algorithms finding
+   Status: no_dense_clusters
+   Signals: score=0.973, trust=0.666, scope=0.632, support=0.375
+   Documents:
+   - PDF Graph Search Algorithms - Computer Science (cs.stanford.edu)
+   - Graph Search Algorithms: Developer's Guide (memgraph.com)
+   - Graph searching algorithm — algorithms documentation (algonotes.readthedocs.io)
+
+Sources
+- cs.stanford.edu (1)
+- netflixtechblog.com (1)
+- numberanalytics.com (1)
+- memgraph.com (1)
+- tigergraph.com (1)
+- petebleackley.github.io (1)
+- algonotes.readthedocs.io (1)
+- puppygraph.com (1)

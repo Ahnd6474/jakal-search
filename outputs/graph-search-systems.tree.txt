@@ -1,0 +1,4 @@
+- node-0: graph search systems (expanded, score=1.000)
+  result_count=8, trusted_count=8, unique_count=8
+  - node-1: graph search systems algorithms search algorithms finding [algorithms, search algorithms, finding] (no_dense_clusters, score=0.973)
+    novelty=1.0, trust=0.666, scope=0.6318, support=0.375, vector_consistency=0.8582, drift=0.0915, keyword_count=6, cluster_size=3, result_count=8, trusted_count=8, unique_count=8

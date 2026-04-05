@@ -5,7 +5,7 @@ from pathlib import Path
 
 from .config import EngineConfig
 from .engine import build_default_engine
-from .types import SearchTree
+from .output import render_output
 
 
 def main() -> int:
@@ -15,6 +15,12 @@ def main() -> int:
     parser.add_argument("--max-nodes", type=int, default=24)
     parser.add_argument("--frontier-width", type=int, default=6)
     parser.add_argument("--results-per-query", type=int, default=12)
+    parser.add_argument(
+        "--format",
+        choices=["report", "urls", "tree", "json"],
+        default="report",
+        help="Output format for stdout",
+    )
     parser.add_argument("--json-out", type=Path)
     args = parser.parse_args()
 
@@ -26,21 +32,9 @@ def main() -> int:
 
     engine = build_default_engine(config)
     tree = engine.run(args.query)
-    _print_tree(tree)
+    print(render_output(tree, args.format))
 
     if args.json_out is not None:
-        args.json_out.write_text(engine.dumps(tree), encoding="utf-8")
+        args.json_out.write_text(render_output(tree, "json"), encoding="utf-8")
         print(f"\nWrote JSON tree to {args.json_out}")
     return 0
-
-
-def _print_tree(tree: SearchTree) -> None:
-    ordered = sorted(tree.nodes.values(), key=lambda node: (node.depth, -node.score, node.node_id))
-    for node in ordered:
-        indent = "  " * node.depth
-        label = f" [{node.cluster_label}]" if node.cluster_label else ""
-        status = node.stop_reason or node.status
-        print(f"{indent}- {node.node_id}: {node.query}{label} ({status}, score={node.score:.3f})")
-        if node.metrics:
-            metrics = ", ".join(f"{key}={value}" for key, value in node.metrics.items())
-            print(f"{indent}  {metrics}")

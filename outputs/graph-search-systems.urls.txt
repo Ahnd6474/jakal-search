@@ -1,0 +1,13 @@
+https://cs.stanford.edu/people/abisee/gs.pdf
+https://netflixtechblog.com/the-ai-evolution-of-graph-search-at-netflix-d416ec5b1151
+https://www.numberanalytics.com/blog/mastering-graph-search-algorithms
+https://memgraph.com/blog/graph-search-algorithms-developers-guide
+https://www.tigergraph.com/glossary/graph-search/
+https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html
+https://algonotes.readthedocs.io/en/latest/Graph-search.html
+https://www.puppygraph.com/blog/graph-search-algorithms
+https://learngraphtheory.org/algorithms.html
+https://www.sciencedirect.com/topics/computer-science/graph-search-problem
+https://ait.systems/search-algorithms/
+https://graphaware.com/glossary/graph-algorithms/
+https://www.geeksforgeeks.org/dsa/graph-data-structure-and-algorithms/

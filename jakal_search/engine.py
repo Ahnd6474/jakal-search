@@ -88,6 +88,7 @@ class SearchTreeEngine:
         self._root_query_vector: np.ndarray | None = None
 
     def run(self, root_query: str) -> SearchTree:
+        self._reset_run_state()
         root_embedding = self.embedder.embed([root_query])
         self._root_query_vector = root_embedding[0]
 
@@ -297,6 +298,13 @@ class SearchTreeEngine:
                 node.status = "pruned"
                 node.stop_reason = "frontier_pruning"
         return kept
+
+    def _reset_run_state(self) -> None:
+        self._id_counter = count()
+        self._document_memory = []
+        self._topic_memory = []
+        self._root_query_vector = None
+        self.trust_scorer.reset()
 
     def _next_node_id(self) -> str:
         return f"node-{next(self._id_counter)}"
