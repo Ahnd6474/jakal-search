@@ -126,3 +126,11 @@ def test_render_tree_and_json_keep_existing_views() -> None:
 
     assert "- node-0: search system" in tree_output
     assert '"root_id": "node-0"' in json_output
+    assert '"request"' in json_output
+    assert '"expansions"' in json_output
+    assert '"logs"' in json_output
+    assert '"query": "search system"' in json_output
+    assert '"document_id"' in json_output
+    assert '"content"' in json_output
+    assert '"embedding_dim"' in json_output
+    assert '"source_profile"' in json_output

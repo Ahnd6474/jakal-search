@@ -4,7 +4,7 @@ import numpy as np
 
 from jakal_search.config import EngineConfig
 from jakal_search.engine import SearchTreeEngine, SimilarityDeduper
-from jakal_search.types import DocumentMemoryItem, SearchDocument
+from jakal_search.types import DocumentMemoryItem, SearchDocument, SearchRequest
 from jakal_search.utils import normalize_rows
 
 
@@ -99,21 +99,31 @@ def test_deduper_keeps_parent_similar_docs_but_blocks_external_duplicates() -> N
             dtype=np.float32,
         )
     )
+    for doc, embedding in zip(docs, embeddings):
+        doc.embedding = embedding
     memory = [
-        DocumentMemoryItem(node_id="parent", url="https://acm.org/parent", embedding=embeddings[0]),
-        DocumentMemoryItem(node_id="sibling", url="https://acm.org/sibling", embedding=embeddings[1]),
+        DocumentMemoryItem(
+            node_id="parent",
+            document_id="https://acm.org/parent",
+            url="https://acm.org/parent",
+            embedding=embeddings[0],
+        ),
+        DocumentMemoryItem(
+            node_id="sibling",
+            document_id="https://acm.org/sibling",
+            url="https://acm.org/sibling",
+            embedding=embeddings[1],
+        ),
     ]
 
-    kept_docs, kept_vectors = deduper.dedupe(
+    kept_docs = deduper.dedupe(
         docs=docs,
-        embeddings=embeddings,
         ancestry_ids={"parent", "current"},
         memory=memory,
     )
 
     assert len(kept_docs) == 1
     assert kept_docs[0].title == "policy item"
-    assert kept_vectors.shape[0] == 1
 
 
 def test_engine_builds_subtopics_and_filters_low_trust_noise() -> None:
@@ -137,6 +147,17 @@ def test_engine_builds_subtopics_and_filters_low_trust_noise() -> None:
     assert any("policy" in query for query in child_queries)
     assert any("vector" in query or "tracking" in query for query in child_queries)
     assert all("miracle" not in doc.title for doc in root.docs)
+    assert all(doc.embedding is not None for doc in root.docs)
+    assert all(doc.content for doc in root.docs)
+    assert all(doc.document_id for doc in root.docs)
+    assert all(doc.source_profile is not None for doc in root.docs)
+    assert any(doc.source_profile.source_type == "research" for doc in root.docs if doc.source_profile)
+    assert all("decision_reason" in tree.nodes[child_id].metrics for child_id in root.children)
+    assert tree.expansions[root.node_id].raw_document_ids
+    assert tree.expansions[root.node_id].trusted_document_ids
+    assert tree.expansions[root.node_id].unique_document_ids
+    assert tree.logs
+    assert any(event.event_type == "trust_filter" for event in tree.logs)
 
 
 def test_max_depth_stops_expansion() -> None:
@@ -185,3 +206,73 @@ def test_engine_reuse_resets_run_state() -> None:
     assert len(first_root.children) == 2
     assert len(second_root.children) == 2
     assert first_queries == second_queries
+
+
+def test_document_clone_prevents_provider_state_leakage() -> None:
+    doc = ROOT_DOCS[0]
+    original_embedding = doc.embedding
+
+    config = EngineConfig()
+    config.limits.max_depth = 1
+    config.limits.min_results = 3
+    config.limits.min_cluster_size = 3
+    config.limits.results_per_query = 8
+    config.similarity.dedupe_threshold = 0.995
+    config.similarity.scope_threshold = 0.2
+
+    engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
+    engine.run("search system")
+
+    assert ROOT_DOCS[0].embedding is original_embedding
+    assert ROOT_DOCS[0].cluster_id is None
+
+
+def test_search_request_overrides_limits_without_mutating_engine_defaults() -> None:
+    config = EngineConfig()
+    config.limits.max_depth = 3
+    config.limits.max_total_nodes = 24
+    config.limits.frontier_width = 6
+    config.limits.results_per_query = 8
+    config.limits.min_results = 3
+    config.limits.min_cluster_size = 3
+    config.similarity.dedupe_threshold = 0.995
+    config.similarity.scope_threshold = 0.2
+
+    engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
+    request = SearchRequest(
+        query="search system",
+        max_depth=1,
+        max_total_nodes=3,
+        frontier_width=2,
+        results_per_query=6,
+        metadata={"suite": "engine"},
+    )
+    tree = engine.run(request)
+
+    assert tree.request is not None
+    assert tree.request.max_depth == 1
+    assert tree.request.metadata["suite"] == "engine"
+    assert engine.config.limits.max_depth == 3
+    assert engine.config.limits.max_total_nodes == 24
+    assert len(tree.nodes) <= 3
+    assert all(tree.nodes[child_id].depth == 1 for child_id in tree.nodes[tree.root_id].children)
+
+
+def test_expansion_context_tracks_stop_reason_for_terminal_nodes() -> None:
+    config = EngineConfig()
+    config.limits.max_depth = 1
+    config.limits.min_results = 3
+    config.limits.min_cluster_size = 3
+    config.limits.results_per_query = 8
+    config.similarity.dedupe_threshold = 0.995
+    config.similarity.scope_threshold = 0.2
+
+    engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
+    tree = engine.run("search system")
+
+    for child_id in tree.nodes[tree.root_id].children:
+        child = tree.nodes[child_id]
+        if child.status == "stopped":
+            context = tree.expansions[child_id]
+            assert context.stop_reason == "max_depth"
+            assert any(event.event_type == "expand_stopped" for event in context.events)

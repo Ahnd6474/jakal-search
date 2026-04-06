@@ -4,7 +4,7 @@ import numpy as np
 
 from .config import TrustConfig
 from .embedding import TextEmbedder
-from .types import SearchDocument
+from .types import SearchDocument, SourceProfile
 from .utils import cosine_similarity
 
 
@@ -19,40 +19,77 @@ class SourceTrustScorer:
         self._prototype_embeddings = None
         self._rejected_embeddings = []
 
-    def score_domain(self, source: str) -> float:
+    def resolve_source_profile(self, source: str) -> SourceProfile:
         host = source.lower()
+        blocked = self._is_blocked(host)
         for suffix, weight in self._config.domain_weights.items():
             normalized = suffix.lower()
             if normalized.startswith("."):
                 if host.endswith(normalized):
-                    return weight
+                    return SourceProfile(
+                        host=host,
+                        domain_score=weight,
+                        source_type=self._infer_source_type(host),
+                        matched_rule=normalized,
+                        blocked=blocked,
+                    )
                 continue
             if host == normalized or host.endswith(f".{normalized}"):
-                return weight
-        return 0.55
+                return SourceProfile(
+                    host=host,
+                    domain_score=weight,
+                    source_type=self._infer_source_type(host),
+                    matched_rule=normalized,
+                    blocked=blocked,
+                )
+        return SourceProfile(
+            host=host,
+            domain_score=0.55,
+            source_type=self._infer_source_type(host),
+            matched_rule=None,
+            blocked=blocked,
+        )
+
+    def _is_blocked(self, host: str) -> bool:
+        blocked_suffixes = tuple(item.lower() for item in self._config.blocked_domain_suffixes)
+        return any(host == suffix or host.endswith(f".{suffix}") for suffix in blocked_suffixes)
+
+    def _infer_source_type(self, host: str) -> str:
+        if host.endswith(".gov"):
+            return "government"
+        if host.endswith(".edu"):
+            return "academic"
+        if any(domain in host for domain in ("arxiv.org", "acm.org", "ieee.org", "nature.com", "science.org")):
+            return "research"
+        if any(domain in host for domain in ("github.com", "docs.python.org", "openai.com")):
+            return "technical"
+        if any(domain in host for domain in ("medium.com", "substack.com", "blogspot.com", "wordpress.com")):
+            return "blog"
+        return "web"
 
     def assess_documents(
         self,
         documents: list[SearchDocument],
-        embeddings: np.ndarray,
-    ) -> tuple[list[SearchDocument], np.ndarray]:
+    ) -> list[SearchDocument]:
         if not documents:
-            return [], np.empty((0, 0), dtype=np.float32)
+            return []
 
         if self._prototype_embeddings is None:
             self._prototype_embeddings = self._embedder.embed(list(self._config.suspicious_prototypes))
 
         kept_docs: list[SearchDocument] = []
-        kept_vectors: list[np.ndarray] = []
-        blocked_suffixes = tuple(item.lower() for item in self._config.blocked_domain_suffixes)
 
-        for doc, vector in zip(documents, embeddings):
-            host = doc.source.lower()
-            if any(host == suffix or host.endswith(f".{suffix}") for suffix in blocked_suffixes):
+        for doc in documents:
+            vector = doc.embedding
+            if vector is None or vector.size == 0:
+                continue
+            profile = self.resolve_source_profile(doc.source)
+            doc.source_profile = profile
+            if profile.blocked:
                 self._rejected_embeddings.append(vector)
                 continue
 
-            domain_score = self.score_domain(host)
+            domain_score = profile.domain_score
             semantic_risk = 0.0
             if self._prototype_embeddings.size:
                 semantic_risk = max(
@@ -83,8 +120,4 @@ class SourceTrustScorer:
                 continue
 
             kept_docs.append(doc)
-            kept_vectors.append(vector)
-
-        if not kept_vectors:
-            return [], np.empty((0, 0), dtype=np.float32)
-        return kept_docs, np.asarray(kept_vectors, dtype=np.float32)
+        return kept_docs

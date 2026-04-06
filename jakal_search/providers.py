@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Protocol
 
 import httpx
-from bs4 import BeautifulSoup
 
 from .types import SearchDocument
 from .utils import extract_domain, unwrap_duckduckgo_url
@@ -24,6 +23,8 @@ class DuckDuckGoHtmlProvider:
         self._search_url = "https://html.duckduckgo.com/html/"
 
     def search(self, query: str, max_results: int) -> list[SearchDocument]:
+        from bs4 import BeautifulSoup
+
         response = self._client.get(self._search_url, params={"q": query})
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")

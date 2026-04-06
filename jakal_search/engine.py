@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from itertools import count
 
 import numpy as np
@@ -14,9 +15,12 @@ from .topics import KeywordTopicBuilder
 from .trust import SourceTrustScorer
 from .types import (
     BranchMetrics,
+    BranchState,
     DocumentMemoryItem,
+    ExpansionContext,
     SearchDocument,
     SearchNode,
+    SearchRequest,
     SearchTree,
     TopicMemoryItem,
 )
@@ -30,27 +34,24 @@ class SimilarityDeduper:
     def dedupe(
         self,
         docs: list[SearchDocument],
-        embeddings: np.ndarray,
         ancestry_ids: set[str],
         memory: list[DocumentMemoryItem],
-    ) -> tuple[list[SearchDocument], np.ndarray]:
+    ) -> list[SearchDocument]:
         kept_docs: list[SearchDocument] = []
-        kept_vectors: list[np.ndarray] = []
 
-        for doc, vector in zip(docs, embeddings):
-            if self._is_local_duplicate(vector, kept_vectors):
+        for doc in docs:
+            vector = doc.embedding
+            if vector is None or vector.size == 0:
+                continue
+            if self._is_local_duplicate(vector, kept_docs):
                 continue
             if self._is_global_duplicate(vector, ancestry_ids, memory):
                 continue
             kept_docs.append(doc)
-            kept_vectors.append(vector)
+        return kept_docs
 
-        if not kept_vectors:
-            return [], np.empty((0, 0), dtype=np.float32)
-        return kept_docs, np.asarray(kept_vectors, dtype=np.float32)
-
-    def _is_local_duplicate(self, vector: np.ndarray, kept_vectors: list[np.ndarray]) -> bool:
-        return any(cosine_similarity(vector, other) >= self._threshold for other in kept_vectors)
+    def _is_local_duplicate(self, vector: np.ndarray, kept_docs: list[SearchDocument]) -> bool:
+        return any(cosine_similarity(vector, other.embedding) >= self._threshold for other in kept_docs)
 
     def _is_global_duplicate(
         self,
@@ -87,74 +88,115 @@ class SearchTreeEngine:
         self._topic_memory: list[TopicMemoryItem] = []
         self._root_query_vector: np.ndarray | None = None
 
-    def run(self, root_query: str) -> SearchTree:
-        self._reset_run_state()
-        root_embedding = self.embedder.embed([root_query])
-        self._root_query_vector = root_embedding[0]
+    def run(self, request: str | SearchRequest) -> SearchTree:
+        search_request = self._coerce_request(request)
+        effective_config = self._config_for_request(search_request)
+        original_config = self.config
 
-        root = SearchNode(
-            node_id=self._next_node_id(),
-            query=root_query,
-            depth=0,
-            centroid=self._root_query_vector,
-            status="pending",
-            score=1.0,
-        )
-        tree = SearchTree(root_id=root.node_id)
-        tree.add_node(root)
-        frontier = [root.node_id]
+        self.config = effective_config
+        try:
+            self._reset_run_state()
+            root_embedding = self.embedder.embed([search_request.query])
+            self._root_query_vector = root_embedding[0]
 
-        while frontier and len(tree.nodes) < self.config.limits.max_total_nodes:
-            frontier.sort(key=lambda node_id: tree.nodes[node_id].score, reverse=True)
-            current_id = frontier.pop(0)
-            current = tree.nodes[current_id]
+            root = SearchNode(
+                node_id=self._next_node_id(),
+                query=search_request.query,
+                depth=0,
+                centroid=self._root_query_vector,
+                status="pending",
+                score=1.0,
+            )
+            tree = SearchTree(root_id=root.node_id, request=search_request)
+            tree.add_node(root)
+            tree.log_event(
+                ExpansionContext(
+                    node_id=root.node_id,
+                    query=root.query,
+                    depth=root.depth,
+                ).record_event(
+                    "search_started",
+                    {
+                        "max_depth": self.config.limits.max_depth,
+                        "max_total_nodes": self.config.limits.max_total_nodes,
+                        "frontier_width": self.config.limits.frontier_width,
+                        "results_per_query": self.config.limits.results_per_query,
+                    },
+                )
+            )
+            frontier = [root.node_id]
 
-            new_children = self._expand_node(tree, current)
-            frontier.extend(new_children)
-            frontier = self._prune_frontier(tree, frontier)
+            while frontier and len(tree.nodes) < self.config.limits.max_total_nodes:
+                frontier.sort(key=lambda node_id: tree.nodes[node_id].score, reverse=True)
+                current_id = frontier.pop(0)
+                current = tree.nodes[current_id]
 
-        for pending_id in frontier:
-            pending = tree.nodes[pending_id]
-            if pending.status == "pending":
-                pending.status = "pruned"
-                pending.stop_reason = "global_node_limit"
+                new_children = self._expand_node(tree, current)
+                frontier.extend(new_children)
+                frontier = self._prune_frontier(tree, frontier)
 
-        return tree
+            for pending_id in frontier:
+                pending = tree.nodes[pending_id]
+                if pending.status == "pending":
+                    pending.status = "pruned"
+                    pending.stop_reason = "global_node_limit"
+
+            return tree
+        finally:
+            self.config = original_config
 
     def dumps(self, tree: SearchTree) -> str:
         return json.dumps(tree.to_dict(), ensure_ascii=False, indent=2)
 
     def _expand_node(self, tree: SearchTree, node: SearchNode) -> list[str]:
+        context = ExpansionContext(node_id=node.node_id, query=node.query, depth=node.depth)
+        tree.add_expansion(context)
+        self._log_context_event(tree, context, "expand_started")
+
         if node.depth >= self.config.limits.max_depth:
             node.status = "stopped"
             node.stop_reason = "max_depth"
+            context.stop_reason = node.stop_reason
+            self._log_context_event(tree, context, "expand_stopped", {"reason": node.stop_reason})
             return []
 
-        results = self.provider.search(node.query, self.config.limits.results_per_query)
+        results = [doc.clone() for doc in self.provider.search(node.query, self.config.limits.results_per_query)]
+        context.raw_document_ids = [doc.document_id for doc in results]
+        self._log_context_event(tree, context, "provider_results", {"count": len(results)})
         if len(results) < self.config.limits.min_results:
             node.status = "stopped"
             node.stop_reason = "too_few_results"
+            context.stop_reason = node.stop_reason
+            self._log_context_event(tree, context, "expand_stopped", {"reason": node.stop_reason})
             return []
 
-        embeddings = self.embedder.embed([doc.text for doc in results])
-        trusted_docs, trusted_vectors = self.trust_scorer.assess_documents(results, embeddings)
+        embedded_docs = self._embed_documents(results)
+        trusted_docs = self.trust_scorer.assess_documents(embedded_docs)
+        context.trusted_document_ids = [doc.document_id for doc in trusted_docs]
+        self._log_context_event(tree, context, "trust_filter", {"count": len(trusted_docs)})
         if len(trusted_docs) < self.config.limits.min_results:
             node.status = "stopped"
             node.stop_reason = "trust_filter_exhausted_results"
+            context.stop_reason = node.stop_reason
+            self._log_context_event(tree, context, "expand_stopped", {"reason": node.stop_reason})
             return []
 
         ancestry_ids = set(tree.ancestry_ids(node.node_id) + [node.node_id])
-        unique_docs, unique_vectors = self.deduper.dedupe(
+        unique_docs = self.deduper.dedupe(
             trusted_docs,
-            trusted_vectors,
             ancestry_ids=ancestry_ids,
             memory=self._document_memory,
         )
+        context.unique_document_ids = [doc.document_id for doc in unique_docs]
+        self._log_context_event(tree, context, "dedupe", {"count": len(unique_docs)})
         if len(unique_docs) < self.config.limits.min_results:
             node.status = "stopped"
             node.stop_reason = "dedupe_exhausted_results"
+            context.stop_reason = node.stop_reason
+            self._log_context_event(tree, context, "expand_stopped", {"reason": node.stop_reason})
             return []
 
+        unique_vectors = self._embedding_matrix(unique_docs)
         node.docs = unique_docs
         node.centroid = mean_embedding(unique_vectors)
         node.metrics.update(
@@ -166,10 +208,14 @@ class SearchTreeEngine:
         )
 
         clusters = self.clusterer.cluster(unique_vectors)
+        context.cluster_ids = [int(cluster.cluster_id) for cluster in clusters]
+        self._log_context_event(tree, context, "clustering", {"count": len(clusters)})
         if not clusters:
             node.status = "stopped"
             node.stop_reason = "no_dense_clusters"
-            self._remember_documents(node.node_id, unique_docs, unique_vectors)
+            self._remember_documents(node.node_id, unique_docs)
+            context.stop_reason = node.stop_reason
+            self._log_context_event(tree, context, "expand_stopped", {"reason": node.stop_reason})
             return []
 
         children: list[SearchNode] = []
@@ -177,16 +223,19 @@ class SearchTreeEngine:
             cluster_docs = [unique_docs[index] for index in cluster.member_indexes]
             if len(cluster_docs) < self.config.limits.min_cluster_size:
                 continue
-            cluster_vectors = unique_vectors[cluster.member_indexes]
-            child = self._make_child_node(tree, node, cluster_docs, cluster.centroid, cluster_vectors)
+            for doc in cluster_docs:
+                doc.cluster_id = cluster.cluster_id
+            child = self._make_child_node(tree, node, cluster_docs, cluster.centroid)
             if child is not None:
                 children.append(child)
 
-        self._remember_documents(node.node_id, unique_docs, unique_vectors)
+        self._remember_documents(node.node_id, unique_docs)
 
         if not children:
             node.status = "stopped"
             node.stop_reason = "all_clusters_pruned"
+            context.stop_reason = node.stop_reason
+            self._log_context_event(tree, context, "expand_stopped", {"reason": node.stop_reason})
             return []
 
         children.sort(key=lambda item: item.score, reverse=True)
@@ -204,6 +253,12 @@ class SearchTreeEngine:
             tree.add_node(child)
 
         node.status = "expanded"
+        self._log_context_event(
+            tree,
+            context,
+            "expand_completed",
+            {"children_kept": len(kept_children), "children_pruned": len(pruned_children)},
+        )
         return [child.node_id for child in kept_children]
 
     def _make_child_node(
@@ -212,51 +267,27 @@ class SearchTreeEngine:
         parent: SearchNode,
         docs: list[SearchDocument],
         centroid: np.ndarray,
-        vectors: np.ndarray,
     ) -> SearchNode | None:
-        label, query, keywords = self.topic_builder.build(parent.query, docs)
-        novelty = self._topic_novelty(parent.node_id, centroid)
-        scope = max(0.0, cosine_similarity(centroid, self._root_query_vector))
-        trust = float(np.mean([doc.trust_score for doc in docs]))
-        support = len(docs) / max(self.config.limits.results_per_query, 1)
-        size_score = min(len(docs) / max(self.config.limits.min_cluster_size, 1), 1.0)
-        vector_consistency, drift = self.path_tracker.score(tree, parent.node_id, centroid)
-        metrics = BranchMetrics(
-            novelty=novelty,
-            trust=trust,
-            scope=scope,
-            support=support,
-            vector_consistency=vector_consistency,
-            size_score=size_score,
-            drift=drift,
-        )
-        decision = self.decision_model.evaluate(metrics)
-        if novelty < self.config.similarity.novelty_threshold:
+        branch = self._evaluate_branch(tree, parent, docs, centroid)
+        if branch.metrics.novelty < self.config.similarity.novelty_threshold:
             return None
-        if scope < self.config.similarity.scope_threshold:
+        if branch.metrics.scope < self.config.similarity.scope_threshold:
             return None
-        if not decision.allowed:
+        if not branch.decision.allowed:
             return None
 
+        node_metrics = branch.to_node_metrics()
+        node_metrics["cluster_size"] = len(docs)
         return SearchNode(
             node_id=self._next_node_id(),
-            query=query,
+            query=branch.topic.query,
             depth=parent.depth + 1,
             parent_id=parent.node_id,
-            score=decision.probability,
-            cluster_label=label,
+            score=branch.decision.probability,
+            cluster_label=branch.topic.label,
             docs=docs,
             centroid=centroid,
-            metrics={
-                "novelty": round(novelty, 4),
-                "trust": round(trust, 4),
-                "scope": round(scope, 4),
-                "support": round(support, 4),
-                "vector_consistency": round(vector_consistency, 4),
-                "drift": round(drift, 4),
-                "keyword_count": len(keywords),
-                "cluster_size": len(vectors),
-            },
+            metrics=node_metrics,
         )
 
     def _topic_novelty(self, parent_node_id: str, centroid: np.ndarray) -> float:
@@ -273,12 +304,92 @@ class SearchTreeEngine:
         self,
         node_id: str,
         docs: list[SearchDocument],
-        embeddings: np.ndarray,
     ) -> None:
-        for doc, embedding in zip(docs, embeddings):
+        for doc in docs:
+            if doc.embedding is None:
+                continue
             self._document_memory.append(
-                DocumentMemoryItem(node_id=node_id, url=doc.url, embedding=embedding)
+                DocumentMemoryItem(
+                    node_id=node_id,
+                    document_id=doc.document_id,
+                    url=doc.url,
+                    embedding=doc.embedding,
+                )
             )
+
+    def _embed_documents(self, docs: list[SearchDocument]) -> list[SearchDocument]:
+        vectors = self.embedder.embed([doc.text for doc in docs])
+        for doc, vector in zip(docs, vectors):
+            doc.embedding = vector
+        return docs
+
+    def _evaluate_branch(
+        self,
+        tree: SearchTree,
+        parent: SearchNode,
+        docs: list[SearchDocument],
+        centroid: np.ndarray,
+    ) -> BranchState:
+        topic = self.topic_builder.build(parent.query, docs)
+        novelty = self._topic_novelty(parent.node_id, centroid)
+        scope = max(0.0, cosine_similarity(centroid, self._root_query_vector))
+        trust = float(np.mean([doc.trust_score for doc in docs]))
+        support = len(docs) / max(self.config.limits.results_per_query, 1)
+        size_score = min(len(docs) / max(self.config.limits.min_cluster_size, 1), 1.0)
+        vector_consistency, drift = self.path_tracker.score(tree, parent.node_id, centroid)
+        metrics = BranchMetrics(
+            novelty=novelty,
+            trust=trust,
+            scope=scope,
+            support=support,
+            vector_consistency=vector_consistency,
+            size_score=size_score,
+            drift=drift,
+        )
+        decision = self.decision_model.evaluate(metrics)
+        return BranchState(topic=topic, metrics=metrics, decision=decision)
+
+    def _embedding_matrix(self, docs: list[SearchDocument]) -> np.ndarray:
+        vectors = [doc.embedding for doc in docs if doc.embedding is not None]
+        if not vectors:
+            return np.empty((0, 0), dtype=np.float32)
+        return np.asarray(vectors, dtype=np.float32)
+
+    def _coerce_request(self, request: str | SearchRequest) -> SearchRequest:
+        if isinstance(request, SearchRequest):
+            return request
+        return SearchRequest(query=request)
+
+    def _config_for_request(self, request: SearchRequest) -> EngineConfig:
+        limits = replace(
+            self.config.limits,
+            max_depth=request.max_depth if request.max_depth is not None else self.config.limits.max_depth,
+            max_total_nodes=(
+                request.max_total_nodes
+                if request.max_total_nodes is not None
+                else self.config.limits.max_total_nodes
+            ),
+            frontier_width=(
+                request.frontier_width
+                if request.frontier_width is not None
+                else self.config.limits.frontier_width
+            ),
+            results_per_query=(
+                request.results_per_query
+                if request.results_per_query is not None
+                else self.config.limits.results_per_query
+            ),
+        )
+        return replace(self.config, limits=limits)
+
+    def _log_context_event(
+        self,
+        tree: SearchTree,
+        context: ExpansionContext,
+        event_type: str,
+        payload: dict[str, int | float | str] | None = None,
+    ) -> None:
+        tree.log_event(context.record_event(event_type, {} if payload is None else dict(payload)))
 
     def _prune_frontier(self, tree: SearchTree, frontier: list[str]) -> list[str]:
         unique_ids: list[str] = []

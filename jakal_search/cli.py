@@ -6,6 +6,7 @@ from pathlib import Path
 from .config import EngineConfig
 from .engine import build_default_engine
 from .output import render_output
+from .types import SearchRequest
 
 
 def main() -> int:
@@ -31,7 +32,14 @@ def main() -> int:
     config.limits.results_per_query = args.results_per_query
 
     engine = build_default_engine(config)
-    tree = engine.run(args.query)
+    request = SearchRequest(
+        query=args.query,
+        max_depth=args.max_depth,
+        max_total_nodes=args.max_nodes,
+        frontier_width=args.frontier_width,
+        results_per_query=args.results_per_query,
+    )
+    tree = engine.run(request)
     print(render_output(tree, args.format))
 
     if args.json_out is not None:
