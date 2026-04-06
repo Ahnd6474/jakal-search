@@ -18,6 +18,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.3"]
 models = ["sentence-transformers>=3.0"]
+directml = ["torch-directml>=0.2.5.dev240914; platform_system == 'Windows'"]
 advanced-clustering = ["hdbscan>=0.8.33"]
 
 [project.scripts]

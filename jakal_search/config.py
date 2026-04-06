@@ -69,6 +69,7 @@ class ScoringConfig:
 @dataclass(slots=True)
 class EngineConfig:
     transformer_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    transformer_device: str = "auto"
     limits: SearchLimits = field(default_factory=SearchLimits)
     similarity: SimilarityConfig = field(default_factory=SimilarityConfig)
     trust: TrustConfig = field(default_factory=TrustConfig)

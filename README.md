@@ -22,9 +22,17 @@ For transformer embeddings:
 pip install -e .[dev,models]
 ```
 
+For Windows Intel GPUs via DirectML:
+
+```bash
+pip install -e .[dev,models,directml]
+python -m jakal_search "graph search systems" --device directml
+```
+
 ## Notes
 
 - `sentence-transformers` is optional. If it is not installed, the engine falls back to a lightweight hashing embedder.
+- On Windows with Intel Iris Xe, `torch-directml` is the practical GPU path. Official PyTorch `xpu` wheels are aimed at newer Intel Arc and Core Ultra GPUs.
 - `hdbscan` is optional. If it is not installed, the engine falls back to `DBSCAN`.
 - The bundled CLI uses DuckDuckGo's HTML endpoint as a simple provider.
 

@@ -17,6 +17,11 @@ def main() -> int:
     parser.add_argument("--frontier-width", type=int, default=6)
     parser.add_argument("--results-per-query", type=int, default=12)
     parser.add_argument(
+        "--device",
+        default="auto",
+        help="Embedding device: auto, cpu, cuda, mps, xpu, or directml",
+    )
+    parser.add_argument(
         "--format",
         choices=["report", "urls", "tree", "json"],
         default="report",
@@ -30,6 +35,7 @@ def main() -> int:
     config.limits.max_total_nodes = args.max_nodes
     config.limits.frontier_width = args.frontier_width
     config.limits.results_per_query = args.results_per_query
+    config.transformer_device = args.device
 
     engine = build_default_engine(config)
     request = SearchRequest(

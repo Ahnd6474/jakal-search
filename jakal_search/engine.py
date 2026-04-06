@@ -423,6 +423,9 @@ class SearchTreeEngine:
 
 def build_default_engine(config: EngineConfig | None = None) -> SearchTreeEngine:
     config = config or EngineConfig()
-    embedder = SentenceTransformerEmbedder(config.transformer_model)
+    embedder = SentenceTransformerEmbedder(
+        config.transformer_model,
+        device=config.transformer_device,
+    )
     provider = DuckDuckGoHtmlProvider()
     return SearchTreeEngine(provider=provider, embedder=embedder, config=config)
