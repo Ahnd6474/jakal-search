@@ -1,0 +1,16 @@
+{
+  "dataset_path": "outputs\\datasets\\trust_dataset_smoke.jsonl",
+  "embedding_device": "directml",
+  "train_examples": 1278,
+  "val_examples": 318,
+  "threshold": 0.32,
+  "metrics": {
+    "train_size": 1278,
+    "val_size": 318,
+    "threshold": 0.32,
+    "val_accuracy": 0.9811320754716981,
+    "val_precision": 0.8,
+    "val_recall": 0.9523809523809523,
+    "val_f1": 0.8695652173913043
+  }
+}

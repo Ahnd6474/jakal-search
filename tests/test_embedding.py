@@ -51,3 +51,30 @@ def test_build_default_engine_uses_configured_transformer_device(monkeypatch) ->
 
     assert captured == {"model_name": "model-a", "device": "directml"}
     assert engine.config.transformer_device == "directml"
+
+
+def test_sentence_transformer_embedder_uses_undecorated_encode_for_directml(monkeypatch) -> None:
+    calls: list[str] = []
+
+    class FakeModel:
+        def __init__(self) -> None:
+            def wrapped(_: object, texts: list[str], normalize_embeddings: bool) -> list[list[float]]:
+                calls.append("wrapped")
+                return [[1.0, 0.0] for _ in texts]
+
+            def decorated(texts: list[str], normalize_embeddings: bool) -> list[list[float]]:
+                calls.append("decorated")
+                return [[0.0, 1.0] for _ in texts]
+
+            decorated.__wrapped__ = wrapped  # type: ignore[attr-defined]
+            self.encode = decorated
+
+    embedder = SentenceTransformerEmbedder.__new__(SentenceTransformerEmbedder)
+    embedder._fallback = None
+    embedder._model = FakeModel()
+    embedder._device = types.SimpleNamespace(type="privateuseone")
+
+    vectors = embedder.embed(["a", "b"])
+
+    assert calls == ["wrapped"]
+    assert vectors.shape == (2, 2)

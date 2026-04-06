@@ -59,7 +59,11 @@ class SentenceTransformerEmbedder:
             return np.empty((0, 0), dtype=np.float32)
         if self._model is None:
             return self._fallback.embed(texts)
-        vectors = self._model.encode(texts, normalize_embeddings=True)
+        encode = self._model.encode
+        if _is_directml_device(self._device) and hasattr(encode, "__wrapped__"):
+            vectors = encode.__wrapped__(self._model, texts, normalize_embeddings=True)
+        else:
+            vectors = encode(texts, normalize_embeddings=True)
         return normalize_rows(np.asarray(vectors, dtype=np.float32))
 
 
@@ -103,3 +107,7 @@ def _get_directml_device() -> Any | None:
         return torch_directml.device()
     except Exception:
         return None
+
+
+def _is_directml_device(device: Any) -> bool:
+    return getattr(device, "type", None) == "privateuseone"

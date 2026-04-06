@@ -1,0 +1,718 @@
+{
+  "best": {
+    "score": 179.9309,
+    "config": {
+      "transformer_model": "sentence-transformers/all-MiniLM-L6-v2",
+      "transformer_device": "directml",
+      "limits": {
+        "max_depth": 2,
+        "max_total_nodes": 10,
+        "frontier_width": 4,
+        "max_children_per_node": 2,
+        "results_per_query": 8,
+        "min_results": 3,
+        "min_cluster_size": 2
+      },
+      "similarity": {
+        "dedupe_threshold": 0.992,
+        "novelty_threshold": 0.16,
+        "scope_threshold": 0.18
+      },
+      "trust": {
+        "min_domain_trust": 0.22,
+        "low_trust_semantic_threshold": 0.74,
+        "blocked_domain_suffixes": [],
+        "domain_weights": {
+          "wikipedia.org": 0.92,
+          "arxiv.org": 0.9,
+          "nature.com": 0.95,
+          "science.org": 0.95,
+          "acm.org": 0.92,
+          "ieee.org": 0.92,
+          "github.com": 0.82,
+          "docs.python.org": 0.95,
+          "openai.com": 0.92,
+          ".gov": 0.96,
+          ".edu": 0.88,
+          "substack.com": 0.48,
+          "medium.com": 0.45,
+          "blogspot.com": 0.3,
+          "wordpress.com": 0.35
+        },
+        "suspicious_prototypes": [
+          "secret miracle cure shocking truth guaranteed results click now",
+          "conspiracy cover up they do not want you to know this",
+          "free crypto giveaway urgent act now limited offer",
+          "spam content farm copied article with no evidence"
+        ]
+      },
+      "scoring": {
+        "min_continue_probability": 0.48,
+        "min_vector_consistency": 0.3,
+        "drift_soft_limit": 0.45,
+        "novelty_weight": 1.8,
+        "trust_weight": 1.1,
+        "scope_weight": 1.0,
+        "support_weight": 0.8,
+        "vector_weight": 1.2,
+        "size_weight": 0.7,
+        "bias": -1.45
+      }
+    },
+    "evaluations": [
+      {
+        "name": "search-system",
+        "score": 89.6779,
+        "child_queries": [
+          "search system vector tracking vector stability",
+          "search system governance policy governance policy"
+        ],
+        "kept_sources": [
+          "arxiv.org",
+          "acm.org",
+          "ieee.org",
+          "github.com",
+          "github.com",
+          "openai.com",
+          "blogspot.com",
+          "blogspot.com"
+        ],
+        "trusted_count": 8,
+        "unique_count": 8
+      },
+      {
+        "name": "agent-platform",
+        "score": 67.2529,
+        "child_queries": [
+          "agent platform deployment workflow platforms"
+        ],
+        "kept_sources": [
+          "docs.python.org",
+          "github.com",
+          "openai.com",
+          "acm.org",
+          "github.com",
+          "docs.python.org",
+          "blogspot.com",
+          "wordpress.com"
+        ],
+        "trusted_count": 8,
+        "unique_count": 8
+      },
+      {
+        "name": "open-source-governance",
+        "score": 23.0,
+        "child_queries": [],
+        "kept_sources": [
+          "acm.org",
+          "github.com",
+          "wordpress.com",
+          "medium.com",
+          "substack.com",
+          "docs.python.org",
+          "blogspot.com",
+          "blogspot.com"
+        ],
+        "trusted_count": 8,
+        "unique_count": 8
+      }
+    ]
+  },
+  "top_results": [
+    {
+      "score": 179.9309,
+      "config": {
+        "transformer_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "transformer_device": "directml",
+        "limits": {
+          "max_depth": 2,
+          "max_total_nodes": 10,
+          "frontier_width": 4,
+          "max_children_per_node": 2,
+          "results_per_query": 8,
+          "min_results": 3,
+          "min_cluster_size": 2
+        },
+        "similarity": {
+          "dedupe_threshold": 0.992,
+          "novelty_threshold": 0.16,
+          "scope_threshold": 0.18
+        },
+        "trust": {
+          "min_domain_trust": 0.22,
+          "low_trust_semantic_threshold": 0.74,
+          "blocked_domain_suffixes": [],
+          "domain_weights": {
+            "wikipedia.org": 0.92,
+            "arxiv.org": 0.9,
+            "nature.com": 0.95,
+            "science.org": 0.95,
+            "acm.org": 0.92,
+            "ieee.org": 0.92,
+            "github.com": 0.82,
+            "docs.python.org": 0.95,
+            "openai.com": 0.92,
+            ".gov": 0.96,
+            ".edu": 0.88,
+            "substack.com": 0.48,
+            "medium.com": 0.45,
+            "blogspot.com": 0.3,
+            "wordpress.com": 0.35
+          },
+          "suspicious_prototypes": [
+            "secret miracle cure shocking truth guaranteed results click now",
+            "conspiracy cover up they do not want you to know this",
+            "free crypto giveaway urgent act now limited offer",
+            "spam content farm copied article with no evidence"
+          ]
+        },
+        "scoring": {
+          "min_continue_probability": 0.48,
+          "min_vector_consistency": 0.3,
+          "drift_soft_limit": 0.45,
+          "novelty_weight": 1.8,
+          "trust_weight": 1.1,
+          "scope_weight": 1.0,
+          "support_weight": 0.8,
+          "vector_weight": 1.2,
+          "size_weight": 0.7,
+          "bias": -1.45
+        }
+      },
+      "evaluations": [
+        {
+          "name": "search-system",
+          "score": 89.6779,
+          "child_queries": [
+            "search system vector tracking vector stability",
+            "search system governance policy governance policy"
+          ],
+          "kept_sources": [
+            "arxiv.org",
+            "acm.org",
+            "ieee.org",
+            "github.com",
+            "github.com",
+            "openai.com",
+            "blogspot.com",
+            "blogspot.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        },
+        {
+          "name": "agent-platform",
+          "score": 67.2529,
+          "child_queries": [
+            "agent platform deployment workflow platforms"
+          ],
+          "kept_sources": [
+            "docs.python.org",
+            "github.com",
+            "openai.com",
+            "acm.org",
+            "github.com",
+            "docs.python.org",
+            "blogspot.com",
+            "wordpress.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        },
+        {
+          "name": "open-source-governance",
+          "score": 23.0,
+          "child_queries": [],
+          "kept_sources": [
+            "acm.org",
+            "github.com",
+            "wordpress.com",
+            "medium.com",
+            "substack.com",
+            "docs.python.org",
+            "blogspot.com",
+            "blogspot.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        }
+      ]
+    },
+    {
+      "score": 179.9309,
+      "config": {
+        "transformer_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "transformer_device": "directml",
+        "limits": {
+          "max_depth": 2,
+          "max_total_nodes": 10,
+          "frontier_width": 4,
+          "max_children_per_node": 2,
+          "results_per_query": 8,
+          "min_results": 3,
+          "min_cluster_size": 2
+        },
+        "similarity": {
+          "dedupe_threshold": 0.992,
+          "novelty_threshold": 0.16,
+          "scope_threshold": 0.18
+        },
+        "trust": {
+          "min_domain_trust": 0.22,
+          "low_trust_semantic_threshold": 0.74,
+          "blocked_domain_suffixes": [],
+          "domain_weights": {
+            "wikipedia.org": 0.92,
+            "arxiv.org": 0.9,
+            "nature.com": 0.95,
+            "science.org": 0.95,
+            "acm.org": 0.92,
+            "ieee.org": 0.92,
+            "github.com": 0.82,
+            "docs.python.org": 0.95,
+            "openai.com": 0.92,
+            ".gov": 0.96,
+            ".edu": 0.88,
+            "substack.com": 0.48,
+            "medium.com": 0.45,
+            "blogspot.com": 0.3,
+            "wordpress.com": 0.35
+          },
+          "suspicious_prototypes": [
+            "secret miracle cure shocking truth guaranteed results click now",
+            "conspiracy cover up they do not want you to know this",
+            "free crypto giveaway urgent act now limited offer",
+            "spam content farm copied article with no evidence"
+          ]
+        },
+        "scoring": {
+          "min_continue_probability": 0.48,
+          "min_vector_consistency": 0.32,
+          "drift_soft_limit": 0.45,
+          "novelty_weight": 1.8,
+          "trust_weight": 1.1,
+          "scope_weight": 1.0,
+          "support_weight": 0.8,
+          "vector_weight": 1.2,
+          "size_weight": 0.7,
+          "bias": -1.45
+        }
+      },
+      "evaluations": [
+        {
+          "name": "search-system",
+          "score": 89.6779,
+          "child_queries": [
+            "search system vector tracking vector stability",
+            "search system governance policy governance policy"
+          ],
+          "kept_sources": [
+            "arxiv.org",
+            "acm.org",
+            "ieee.org",
+            "github.com",
+            "github.com",
+            "openai.com",
+            "blogspot.com",
+            "blogspot.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        },
+        {
+          "name": "agent-platform",
+          "score": 67.2529,
+          "child_queries": [
+            "agent platform deployment workflow platforms"
+          ],
+          "kept_sources": [
+            "docs.python.org",
+            "github.com",
+            "openai.com",
+            "acm.org",
+            "github.com",
+            "docs.python.org",
+            "blogspot.com",
+            "wordpress.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        },
+        {
+          "name": "open-source-governance",
+          "score": 23.0,
+          "child_queries": [],
+          "kept_sources": [
+            "acm.org",
+            "github.com",
+            "wordpress.com",
+            "medium.com",
+            "substack.com",
+            "docs.python.org",
+            "blogspot.com",
+            "blogspot.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        }
+      ]
+    },
+    {
+      "score": 179.9309,
+      "config": {
+        "transformer_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "transformer_device": "directml",
+        "limits": {
+          "max_depth": 2,
+          "max_total_nodes": 10,
+          "frontier_width": 4,
+          "max_children_per_node": 2,
+          "results_per_query": 8,
+          "min_results": 3,
+          "min_cluster_size": 2
+        },
+        "similarity": {
+          "dedupe_threshold": 0.992,
+          "novelty_threshold": 0.16,
+          "scope_threshold": 0.18
+        },
+        "trust": {
+          "min_domain_trust": 0.22,
+          "low_trust_semantic_threshold": 0.78,
+          "blocked_domain_suffixes": [],
+          "domain_weights": {
+            "wikipedia.org": 0.92,
+            "arxiv.org": 0.9,
+            "nature.com": 0.95,
+            "science.org": 0.95,
+            "acm.org": 0.92,
+            "ieee.org": 0.92,
+            "github.com": 0.82,
+            "docs.python.org": 0.95,
+            "openai.com": 0.92,
+            ".gov": 0.96,
+            ".edu": 0.88,
+            "substack.com": 0.48,
+            "medium.com": 0.45,
+            "blogspot.com": 0.3,
+            "wordpress.com": 0.35
+          },
+          "suspicious_prototypes": [
+            "secret miracle cure shocking truth guaranteed results click now",
+            "conspiracy cover up they do not want you to know this",
+            "free crypto giveaway urgent act now limited offer",
+            "spam content farm copied article with no evidence"
+          ]
+        },
+        "scoring": {
+          "min_continue_probability": 0.48,
+          "min_vector_consistency": 0.3,
+          "drift_soft_limit": 0.45,
+          "novelty_weight": 1.8,
+          "trust_weight": 1.1,
+          "scope_weight": 1.0,
+          "support_weight": 0.8,
+          "vector_weight": 1.2,
+          "size_weight": 0.7,
+          "bias": -1.45
+        }
+      },
+      "evaluations": [
+        {
+          "name": "search-system",
+          "score": 89.6779,
+          "child_queries": [
+            "search system vector tracking vector stability",
+            "search system governance policy governance policy"
+          ],
+          "kept_sources": [
+            "arxiv.org",
+            "acm.org",
+            "ieee.org",
+            "github.com",
+            "github.com",
+            "openai.com",
+            "blogspot.com",
+            "blogspot.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        },
+        {
+          "name": "agent-platform",
+          "score": 67.2529,
+          "child_queries": [
+            "agent platform deployment workflow platforms"
+          ],
+          "kept_sources": [
+            "docs.python.org",
+            "github.com",
+            "openai.com",
+            "acm.org",
+            "github.com",
+            "docs.python.org",
+            "blogspot.com",
+            "wordpress.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        },
+        {
+          "name": "open-source-governance",
+          "score": 23.0,
+          "child_queries": [],
+          "kept_sources": [
+            "acm.org",
+            "github.com",
+            "wordpress.com",
+            "medium.com",
+            "substack.com",
+            "docs.python.org",
+            "blogspot.com",
+            "blogspot.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        }
+      ]
+    },
+    {
+      "score": 179.9309,
+      "config": {
+        "transformer_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "transformer_device": "directml",
+        "limits": {
+          "max_depth": 2,
+          "max_total_nodes": 10,
+          "frontier_width": 4,
+          "max_children_per_node": 2,
+          "results_per_query": 8,
+          "min_results": 3,
+          "min_cluster_size": 2
+        },
+        "similarity": {
+          "dedupe_threshold": 0.992,
+          "novelty_threshold": 0.16,
+          "scope_threshold": 0.18
+        },
+        "trust": {
+          "min_domain_trust": 0.22,
+          "low_trust_semantic_threshold": 0.78,
+          "blocked_domain_suffixes": [],
+          "domain_weights": {
+            "wikipedia.org": 0.92,
+            "arxiv.org": 0.9,
+            "nature.com": 0.95,
+            "science.org": 0.95,
+            "acm.org": 0.92,
+            "ieee.org": 0.92,
+            "github.com": 0.82,
+            "docs.python.org": 0.95,
+            "openai.com": 0.92,
+            ".gov": 0.96,
+            ".edu": 0.88,
+            "substack.com": 0.48,
+            "medium.com": 0.45,
+            "blogspot.com": 0.3,
+            "wordpress.com": 0.35
+          },
+          "suspicious_prototypes": [
+            "secret miracle cure shocking truth guaranteed results click now",
+            "conspiracy cover up they do not want you to know this",
+            "free crypto giveaway urgent act now limited offer",
+            "spam content farm copied article with no evidence"
+          ]
+        },
+        "scoring": {
+          "min_continue_probability": 0.48,
+          "min_vector_consistency": 0.32,
+          "drift_soft_limit": 0.45,
+          "novelty_weight": 1.8,
+          "trust_weight": 1.1,
+          "scope_weight": 1.0,
+          "support_weight": 0.8,
+          "vector_weight": 1.2,
+          "size_weight": 0.7,
+          "bias": -1.45
+        }
+      },
+      "evaluations": [
+        {
+          "name": "search-system",
+          "score": 89.6779,
+          "child_queries": [
+            "search system vector tracking vector stability",
+            "search system governance policy governance policy"
+          ],
+          "kept_sources": [
+            "arxiv.org",
+            "acm.org",
+            "ieee.org",
+            "github.com",
+            "github.com",
+            "openai.com",
+            "blogspot.com",
+            "blogspot.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        },
+        {
+          "name": "agent-platform",
+          "score": 67.2529,
+          "child_queries": [
+            "agent platform deployment workflow platforms"
+          ],
+          "kept_sources": [
+            "docs.python.org",
+            "github.com",
+            "openai.com",
+            "acm.org",
+            "github.com",
+            "docs.python.org",
+            "blogspot.com",
+            "wordpress.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        },
+        {
+          "name": "open-source-governance",
+          "score": 23.0,
+          "child_queries": [],
+          "kept_sources": [
+            "acm.org",
+            "github.com",
+            "wordpress.com",
+            "medium.com",
+            "substack.com",
+            "docs.python.org",
+            "blogspot.com",
+            "blogspot.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        }
+      ]
+    },
+    {
+      "score": 179.9309,
+      "config": {
+        "transformer_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "transformer_device": "directml",
+        "limits": {
+          "max_depth": 2,
+          "max_total_nodes": 10,
+          "frontier_width": 4,
+          "max_children_per_node": 2,
+          "results_per_query": 8,
+          "min_results": 3,
+          "min_cluster_size": 2
+        },
+        "similarity": {
+          "dedupe_threshold": 0.992,
+          "novelty_threshold": 0.16,
+          "scope_threshold": 0.18
+        },
+        "trust": {
+          "min_domain_trust": 0.22,
+          "low_trust_semantic_threshold": 0.74,
+          "blocked_domain_suffixes": [],
+          "domain_weights": {
+            "wikipedia.org": 0.92,
+            "arxiv.org": 0.9,
+            "nature.com": 0.95,
+            "science.org": 0.95,
+            "acm.org": 0.92,
+            "ieee.org": 0.92,
+            "github.com": 0.82,
+            "docs.python.org": 0.95,
+            "openai.com": 0.92,
+            ".gov": 0.96,
+            ".edu": 0.88,
+            "substack.com": 0.48,
+            "medium.com": 0.45,
+            "blogspot.com": 0.3,
+            "wordpress.com": 0.35
+          },
+          "suspicious_prototypes": [
+            "secret miracle cure shocking truth guaranteed results click now",
+            "conspiracy cover up they do not want you to know this",
+            "free crypto giveaway urgent act now limited offer",
+            "spam content farm copied article with no evidence"
+          ]
+        },
+        "scoring": {
+          "min_continue_probability": 0.46,
+          "min_vector_consistency": 0.3,
+          "drift_soft_limit": 0.45,
+          "novelty_weight": 1.8,
+          "trust_weight": 1.1,
+          "scope_weight": 1.0,
+          "support_weight": 0.8,
+          "vector_weight": 1.2,
+          "size_weight": 0.7,
+          "bias": -1.45
+        }
+      },
+      "evaluations": [
+        {
+          "name": "search-system",
+          "score": 89.6779,
+          "child_queries": [
+            "search system vector tracking vector stability",
+            "search system governance policy governance policy"
+          ],
+          "kept_sources": [
+            "arxiv.org",
+            "acm.org",
+            "ieee.org",
+            "github.com",
+            "github.com",
+            "openai.com",
+            "blogspot.com",
+            "blogspot.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        },
+        {
+          "name": "agent-platform",
+          "score": 67.2529,
+          "child_queries": [
+            "agent platform deployment workflow platforms"
+          ],
+          "kept_sources": [
+            "docs.python.org",
+            "github.com",
+            "openai.com",
+            "acm.org",
+            "github.com",
+            "docs.python.org",
+            "blogspot.com",
+            "wordpress.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        },
+        {
+          "name": "open-source-governance",
+          "score": 23.0,
+          "child_queries": [],
+          "kept_sources": [
+            "acm.org",
+            "github.com",
+            "wordpress.com",
+            "medium.com",
+            "substack.com",
+            "docs.python.org",
+            "blogspot.com",
+            "blogspot.com"
+          ],
+          "trusted_count": 8,
+          "unique_count": 8
+        }
+      ]
+    }
+  ]
+}

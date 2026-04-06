@@ -1,0 +1,16 @@
+{
+  "dataset_path": "outputs\\datasets\\trust_dataset.jsonl",
+  "embedding_device": "directml",
+  "train_examples": 5738,
+  "val_examples": 1433,
+  "threshold": 0.32,
+  "metrics": {
+    "train_size": 5738,
+    "val_size": 1433,
+    "threshold": 0.32,
+    "val_accuracy": 0.9581297976273552,
+    "val_precision": 0.9740980573543015,
+    "val_recall": 0.9705069124423963,
+    "val_f1": 0.9722991689750692
+  }
+}

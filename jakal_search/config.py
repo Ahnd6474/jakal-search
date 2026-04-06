@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 
 
 DEFAULT_DOMAIN_TRUST = {
@@ -42,8 +43,23 @@ class SimilarityConfig:
 class TrustConfig:
     min_domain_trust: float = 0.22
     low_trust_semantic_threshold: float = 0.78
+    domain_score_weight: float = 0.72
+    semantic_score_weight: float = 0.28
+    mlp_enabled_for_transformers: bool = True
+    mlp_hidden_dim: int = 96
+    mlp_epochs: int = 120
+    mlp_learning_rate: float = 0.05
+    mlp_weight_decay: float = 1e-4
+    mlp_model_path: str | None = None
+    mlp_threshold: float = 0.5
     blocked_domain_suffixes: tuple[str, ...] = ()
     domain_weights: dict[str, float] = field(default_factory=lambda: DEFAULT_DOMAIN_TRUST.copy())
+    trusted_prototypes: tuple[str, ...] = (
+        "peer reviewed paper with citations, evidence, and transparent methodology",
+        "official technical documentation with concrete examples and API references",
+        "maintainer guide with reproducible steps, version notes, and tradeoff discussion",
+        "government or academic publication grounded in verifiable sources",
+    )
     suspicious_prototypes: tuple[str, ...] = (
         "secret miracle cure shocking truth guaranteed results click now",
         "conspiracy cover up they do not want you to know this",
@@ -70,6 +86,7 @@ class ScoringConfig:
 class EngineConfig:
     transformer_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     transformer_device: str = "auto"
+    trust_model_path: str | None = None
     limits: SearchLimits = field(default_factory=SearchLimits)
     similarity: SimilarityConfig = field(default_factory=SimilarityConfig)
     trust: TrustConfig = field(default_factory=TrustConfig)

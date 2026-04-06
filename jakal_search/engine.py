@@ -423,6 +423,8 @@ class SearchTreeEngine:
 
 def build_default_engine(config: EngineConfig | None = None) -> SearchTreeEngine:
     config = config or EngineConfig()
+    if config.trust_model_path is not None:
+        config.trust.mlp_model_path = config.trust_model_path
     embedder = SentenceTransformerEmbedder(
         config.transformer_model,
         device=config.transformer_device,

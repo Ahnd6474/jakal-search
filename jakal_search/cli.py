@@ -22,6 +22,12 @@ def main() -> int:
         help="Embedding device: auto, cpu, cuda, mps, xpu, or directml",
     )
     parser.add_argument(
+        "--trust-model",
+        type=Path,
+        default=None,
+        help="Path to a trained supervised trust head (.pt).",
+    )
+    parser.add_argument(
         "--format",
         choices=["report", "urls", "tree", "json"],
         default="report",
@@ -36,6 +42,7 @@ def main() -> int:
     config.limits.frontier_width = args.frontier_width
     config.limits.results_per_query = args.results_per_query
     config.transformer_device = args.device
+    config.trust_model_path = None if args.trust_model is None else str(args.trust_model)
 
     engine = build_default_engine(config)
     request = SearchRequest(
