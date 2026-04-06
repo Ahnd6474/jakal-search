@@ -80,6 +80,25 @@ class ScoringConfig:
     vector_weight: float = 1.2
     size_weight: float = 0.7
     bias: float = -1.6
+    mlp_model_path: str | None = None
+    mlp_hidden_dim: int = 24
+    mlp_threshold: float = 0.5
+
+
+@dataclass(slots=True)
+class TopicRerankerConfig:
+    enabled: bool = True
+    candidate_pool_size: int = 12
+    model_path: str | None = None
+    hidden_dim: int = 24
+
+
+@dataclass(slots=True)
+class FalsehoodConfig:
+    enabled: bool = True
+    model_path: str | None = None
+    hidden_dim: int = 96
+    threshold: float = 0.5
 
 
 @dataclass(slots=True)
@@ -87,7 +106,12 @@ class EngineConfig:
     transformer_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     transformer_device: str = "auto"
     trust_model_path: str | None = None
+    branch_model_path: str | None = None
+    topic_reranker_model_path: str | None = None
+    falsehood_model_path: str | None = None
     limits: SearchLimits = field(default_factory=SearchLimits)
     similarity: SimilarityConfig = field(default_factory=SimilarityConfig)
     trust: TrustConfig = field(default_factory=TrustConfig)
     scoring: ScoringConfig = field(default_factory=ScoringConfig)
+    topic_reranker: TopicRerankerConfig = field(default_factory=TopicRerankerConfig)
+    falsehood: FalsehoodConfig = field(default_factory=FalsehoodConfig)

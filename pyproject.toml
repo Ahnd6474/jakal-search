@@ -25,6 +25,9 @@ advanced-clustering = ["hdbscan>=0.8.33"]
 jakal-search = "jakal_search.cli:main"
 jakal-search-tune = "jakal_search.tuning:main"
 jakal-search-trust = "jakal_search.trust_training:main"
+jakal-search-branch = "jakal_search.branch_training:main"
+jakal-search-reranker = "jakal_search.reranker_training:main"
+jakal-search-falsehood = "jakal_search.falsehood_training:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

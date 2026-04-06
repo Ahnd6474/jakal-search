@@ -92,3 +92,19 @@ def test_trust_scorer_uses_embedding_mlp_for_transformer_embeddings() -> None:
     assert len(kept_docs) == 1
     assert kept_docs[0].source == "acm.org"
     assert docs[0].trust_score > docs[1].trust_score
+
+
+def test_trust_scorer_uses_source_features_with_same_text() -> None:
+    config = TrustConfig(mlp_epochs=40, mlp_hidden_dim=16)
+    scorer = SourceTrustScorer(config, FakeTransformerEmbedder())
+    docs = [
+        make_doc("official documentation evidence", "docs.python.org"),
+        make_doc("official documentation evidence", "blogspot.com"),
+    ]
+    for doc, embedding in zip(docs, FakeTransformerEmbedder().embed([doc.text for doc in docs])):
+        doc.embedding = embedding
+
+    kept_docs = scorer.assess_documents(docs)
+
+    assert any(doc.source == "docs.python.org" for doc in kept_docs)
+    assert docs[0].trust_score > docs[1].trust_score

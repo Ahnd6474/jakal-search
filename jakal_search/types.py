@@ -36,6 +36,7 @@ class SearchDocument:
     content: str = ""
     metadata: dict[str, Any] = field(default_factory=dict)
     trust_score: float = 0.5
+    claim_falsehood_score: float = 0.0
     semantic_risk: float = 0.0
     embedding: np.ndarray | None = None
     cluster_id: int | None = None
@@ -67,6 +68,7 @@ class SearchDocument:
             content=self.content,
             metadata=self.metadata.copy(),
             trust_score=self.trust_score,
+            claim_falsehood_score=self.claim_falsehood_score,
             semantic_risk=self.semantic_risk,
             embedding=None if self.embedding is None else self.embedding.copy(),
             cluster_id=self.cluster_id,
@@ -84,6 +86,7 @@ class SearchDocument:
             "query": self.query,
             "rank": self.rank,
             "trust_score": self.trust_score,
+            "claim_falsehood_score": self.claim_falsehood_score,
             "semantic_risk": self.semantic_risk,
             "embedding_dim": self.embedding_dim,
             "cluster_id": None if self.cluster_id is None else int(self.cluster_id),

@@ -1,0 +1,14 @@
+{
+  "train_examples": 960,
+  "val_examples": 240,
+  "threshold": 0.5700000000000001,
+  "metrics": {
+    "train_size": 960,
+    "val_size": 240,
+    "threshold": 0.5700000000000001,
+    "val_accuracy": 0.9958333333333333,
+    "val_precision": 1.0,
+    "val_recall": 0.9916666666666667,
+    "val_f1": 0.99581589958159
+  }
+}

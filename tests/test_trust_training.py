@@ -10,6 +10,8 @@ from jakal_search.config import TrustConfig
 from jakal_search.trust import EmbeddingTrustMLP, SourceTrustScorer
 from jakal_search.trust_training import (
     TrustDatasetExample,
+    balance_examples,
+    build_training_matrix,
     dedupe_examples,
     evaluate_model,
     extract_email_text,
@@ -80,3 +82,32 @@ def test_evaluate_model_returns_threshold_and_metrics() -> None:
 
     assert 0.3 <= threshold <= 0.8
     assert metrics.val_size == 2
+
+
+def test_balance_examples_caps_sources_and_labels() -> None:
+    examples = []
+    for index in range(5):
+        examples.append(TrustDatasetExample(text=f"trusted example {index} long enough", label=1, source="docs", source_url="https://docs.python.org", item_id=str(index)))
+        examples.append(TrustDatasetExample(text=f"spam example {index} long enough", label=0, source="spam", source_url="https://blogspot.com", item_id=f"s{index}"))
+
+    balanced = balance_examples(examples, max_per_source=3, balance_labels=True, seed=0)
+
+    assert len([item for item in balanced if item.source == "docs"]) <= 3
+    assert len([item for item in balanced if item.source == "spam"]) <= 3
+    assert sum(item.label == 1 for item in balanced) == sum(item.label == 0 for item in balanced)
+
+
+def test_build_training_matrix_appends_site_features() -> None:
+    examples = [
+        TrustDatasetExample(
+            text="trusted documentation example long enough",
+            label=1,
+            source="docs",
+            source_url="https://docs.python.org/3/tutorial/index.html",
+            item_id="1",
+        )
+    ]
+    matrix = build_training_matrix(examples, np.asarray([[1.0, 0.5]], dtype=np.float32), config=TrustConfig())
+
+    assert matrix.shape[0] == 1
+    assert matrix.shape[1] > 2

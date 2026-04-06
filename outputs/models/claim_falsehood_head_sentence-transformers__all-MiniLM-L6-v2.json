@@ -1,0 +1,16 @@
+{
+  "dataset_path": "outputs\\datasets\\claim_falsehood_dataset.jsonl",
+  "embedding_device": "directml",
+  "train_examples": 458,
+  "val_examples": 114,
+  "threshold": 0.5,
+  "metrics": {
+    "train_size": 458,
+    "val_size": 114,
+    "threshold": 0.5,
+    "val_accuracy": 0.7719298245614035,
+    "val_precision": 0.7183098591549296,
+    "val_recall": 0.8947368421052632,
+    "val_f1": 0.796875
+  }
+}

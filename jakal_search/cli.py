@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 from .config import EngineConfig
@@ -10,6 +11,10 @@ from .types import SearchRequest
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(description="Tree-based exploratory search engine.")
     parser.add_argument("query", help="Root search query")
     parser.add_argument("--max-depth", type=int, default=3)
@@ -28,6 +33,24 @@ def main() -> int:
         help="Path to a trained supervised trust head (.pt).",
     )
     parser.add_argument(
+        "--branch-model",
+        type=Path,
+        default=None,
+        help="Path to a trained branch decision head (.pt).",
+    )
+    parser.add_argument(
+        "--topic-reranker-model",
+        type=Path,
+        default=None,
+        help="Path to a trained topic/query reranker head (.pt).",
+    )
+    parser.add_argument(
+        "--claim-model",
+        type=Path,
+        default=None,
+        help="Path to a trained false-claim head (.pt).",
+    )
+    parser.add_argument(
         "--format",
         choices=["report", "urls", "tree", "json"],
         default="report",
@@ -43,6 +66,9 @@ def main() -> int:
     config.limits.results_per_query = args.results_per_query
     config.transformer_device = args.device
     config.trust_model_path = None if args.trust_model is None else str(args.trust_model)
+    config.branch_model_path = None if args.branch_model is None else str(args.branch_model)
+    config.topic_reranker_model_path = None if args.topic_reranker_model is None else str(args.topic_reranker_model)
+    config.falsehood_model_path = None if args.claim_model is None else str(args.claim_model)
 
     engine = build_default_engine(config)
     request = SearchRequest(

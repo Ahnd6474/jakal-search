@@ -1,10 +1,44 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
+import torch
+from torch import nn
 
 from .config import ScoringConfig
 from .types import BranchDecision, BranchMetrics, SearchTree
 from .utils import cosine_similarity, logistic, mean_embedding
+
+
+def branch_metrics_to_vector(metrics: BranchMetrics) -> np.ndarray:
+    return np.asarray(
+        [
+            metrics.novelty,
+            metrics.trust,
+            metrics.scope,
+            metrics.support,
+            metrics.vector_consistency,
+            metrics.size_score,
+            metrics.drift,
+        ],
+        dtype=np.float32,
+    )
+
+
+class BranchDecisionMLP(nn.Module):
+    def __init__(self, input_dim: int, hidden_dim: int) -> None:
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, max(hidden_dim // 2, 4)),
+            nn.ReLU(),
+            nn.Linear(max(hidden_dim // 2, 4), 1),
+        )
+
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+        return self.layers(inputs).squeeze(-1)
 
 
 class VectorPathTracker:
@@ -39,6 +73,9 @@ class VectorPathTracker:
 class BranchDecisionModel:
     def __init__(self, config: ScoringConfig) -> None:
         self._config = config
+        self._head: BranchDecisionMLP | None = None
+        self._threshold = config.mlp_threshold
+        self._maybe_load_model()
 
     def evaluate(self, metrics: BranchMetrics) -> BranchDecision:
         if metrics.novelty <= 0.0:
@@ -47,6 +84,12 @@ class BranchDecisionModel:
             return BranchDecision(allowed=False, probability=0.0, reason="out_of_scope")
         if metrics.vector_consistency < self._config.min_vector_consistency and metrics.novelty < 0.35:
             return BranchDecision(allowed=False, probability=0.0, reason="unstable_vector_path")
+
+        if self._head is not None:
+            probability = self._predict_probability(metrics)
+            if probability < self._threshold:
+                return BranchDecision(allowed=False, probability=probability, reason="branch_model")
+            return BranchDecision(allowed=True, probability=probability, reason="branch_model")
 
         linear = (
             self._config.bias
@@ -61,3 +104,25 @@ class BranchDecisionModel:
         if probability < self._config.min_continue_probability:
             return BranchDecision(allowed=False, probability=probability, reason="stop_classifier")
         return BranchDecision(allowed=True, probability=probability, reason="continue")
+
+    def _predict_probability(self, metrics: BranchMetrics) -> float:
+        if self._head is None:
+            return 0.5
+        vector = branch_metrics_to_vector(metrics)
+        with torch.no_grad():
+            logits = self._head(torch.from_numpy(vector).unsqueeze(0))
+            return float(torch.sigmoid(logits).item())
+
+    def _maybe_load_model(self) -> None:
+        model_path = self._config.mlp_model_path
+        if not model_path:
+            return
+        path = Path(model_path)
+        if not path.exists():
+            return
+        payload = torch.load(path, map_location="cpu", weights_only=True)
+        model = BranchDecisionMLP(int(payload["input_dim"]), int(payload["hidden_dim"]))
+        model.load_state_dict(payload["state_dict"])
+        model.eval()
+        self._head = model
+        self._threshold = float(payload.get("threshold", self._config.mlp_threshold))

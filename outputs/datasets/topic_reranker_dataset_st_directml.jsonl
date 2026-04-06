@@ -1,0 +1,104 @@
+{"candidate": "drift", "label": 1, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system drift", "label": 1, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "governance", "label": 1, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system governance", "label": 1, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "policy", "label": 1, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system policy", "label": 1, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "tracking", "label": 1, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system tracking", "label": 1, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "vector", "label": 1, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system vector", "label": 1, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "conspiracy", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system conspiracy", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "guide", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system guide", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "miracle", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system miracle", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "notes", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system notes", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "official", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system official", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "secret", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system secret", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "system", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "search system system", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "governance", "label": 0, "source_case": "search-system", "parent_query": "search system", "doc_indexes": [0, 1, 2]}
+{"candidate": "container", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform container", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "deployment", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform deployment", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "latency", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform latency", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "monitoring", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform monitoring", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "observability", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform observability", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "rollout", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform rollout", "label": 1, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "giveaway", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform giveaway", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "guide", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform guide", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "notes", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform notes", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "official", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform official", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "secret", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform secret", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "system", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform system", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "urgent", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "agent platform urgent", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "governance", "label": 0, "source_case": "agent-platform", "parent_query": "agent platform", "doc_indexes": [0, 1, 2]}
+{"candidate": "community", "label": 1, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "open source governance community", "label": 1, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "governance", "label": 1, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "open source governance governance", "label": 1, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "maintainer", "label": 1, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "open source governance maintainer", "label": 1, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "moderation", "label": 1, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "open source governance moderation", "label": 1, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "policy", "label": 1, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "open source governance policy", "label": 1, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "conspiracy", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "open source governance conspiracy", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "guide", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "open source governance guide", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "notes", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "open source governance notes", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "official", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "open source governance official", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "secret", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "open source governance secret", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "system", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "open source governance system", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "policy", "label": 0, "source_case": "open-source-governance", "parent_query": "open source governance", "doc_indexes": [0, 1, 2]}
+{"candidate": "benchmark", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation benchmark", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "evaluation", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation evaluation", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "hallucination", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation hallucination", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "monitoring", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation monitoring", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "regression", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation regression", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "safety", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation safety", "label": 1, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "bypass", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation bypass", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "guaranteed", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation guaranteed", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "guide", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation guide", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "hack", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation hack", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "notes", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation notes", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "official", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation official", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "secret", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation secret", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "system", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "model evaluation system", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}
+{"candidate": "deployment", "label": 0, "source_case": "model-evaluation", "parent_query": "model evaluation", "doc_indexes": [0, 1, 2]}

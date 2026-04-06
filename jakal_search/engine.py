@@ -9,6 +9,7 @@ import numpy as np
 from .clustering import DensityClusterer
 from .config import EngineConfig
 from .embedding import SentenceTransformerEmbedder, TextEmbedder
+from .falsehood import ClaimFalsehoodScorer
 from .providers import DuckDuckGoHtmlProvider, SearchProvider
 from .scoring import BranchDecisionModel, VectorPathTracker
 from .topics import KeywordTopicBuilder
@@ -79,7 +80,8 @@ class SearchTreeEngine:
         self.embedder = embedder
         self.clusterer = DensityClusterer(self.config.limits.min_cluster_size)
         self.trust_scorer = SourceTrustScorer(self.config.trust, embedder)
-        self.topic_builder = KeywordTopicBuilder()
+        self.falsehood_scorer = ClaimFalsehoodScorer(self.config.falsehood)
+        self.topic_builder = KeywordTopicBuilder(embedder, self.config.topic_reranker)
         self.path_tracker = VectorPathTracker(self.config.scoring)
         self.decision_model = BranchDecisionModel(self.config.scoring)
         self.deduper = SimilarityDeduper(self.config.similarity.dedupe_threshold)
@@ -172,6 +174,7 @@ class SearchTreeEngine:
 
         embedded_docs = self._embed_documents(results)
         trusted_docs = self.trust_scorer.assess_documents(embedded_docs)
+        trusted_docs = self.falsehood_scorer.assess_documents(trusted_docs)
         context.trusted_document_ids = [doc.document_id for doc in trusted_docs]
         self._log_context_event(tree, context, "trust_filter", {"count": len(trusted_docs)})
         if len(trusted_docs) < self.config.limits.min_results:
@@ -425,6 +428,12 @@ def build_default_engine(config: EngineConfig | None = None) -> SearchTreeEngine
     config = config or EngineConfig()
     if config.trust_model_path is not None:
         config.trust.mlp_model_path = config.trust_model_path
+    if config.branch_model_path is not None:
+        config.scoring.mlp_model_path = config.branch_model_path
+    if config.topic_reranker_model_path is not None:
+        config.topic_reranker.model_path = config.topic_reranker_model_path
+    if config.falsehood_model_path is not None:
+        config.falsehood.model_path = config.falsehood_model_path
     embedder = SentenceTransformerEmbedder(
         config.transformer_model,
         device=config.transformer_device,

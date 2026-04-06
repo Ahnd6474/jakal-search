@@ -1,16 +1,16 @@
 {
-  "dataset_path": "outputs\\datasets\\trust_dataset_news.jsonl",
+  "dataset_path": "outputs\\datasets\\trust_dataset_balanced.jsonl",
   "embedding_device": "directml",
-  "train_examples": 5883,
-  "val_examples": 1470,
-  "threshold": 0.31,
+  "train_examples": 1088,
+  "val_examples": 272,
+  "threshold": 0.5,
   "metrics": {
-    "train_size": 5883,
-    "val_size": 1470,
-    "threshold": 0.31,
-    "val_accuracy": 0.9380952380952381,
-    "val_precision": 0.9683720930232558,
-    "val_recall": 0.9480874316939891,
-    "val_f1": 0.9581224114127934
+    "train_size": 1088,
+    "val_size": 272,
+    "threshold": 0.5,
+    "val_accuracy": 0.8970588235294118,
+    "val_precision": 0.921875,
+    "val_recall": 0.8676470588235294,
+    "val_f1": 0.893939393939394
   }
 }

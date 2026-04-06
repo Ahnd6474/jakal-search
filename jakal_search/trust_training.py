@@ -4,7 +4,6 @@ import argparse
 import csv
 import json
 import random
-import re
 import tarfile
 import time
 import zipfile
@@ -24,11 +23,10 @@ from torch import nn
 
 from .config import TrustConfig
 from .embedding import SentenceTransformerEmbedder
-from .trust import EmbeddingTrustMLP
+from .trust import EmbeddingTrustMLP, build_trust_feature_vector, resolve_source_profile
 
 
 ARXIV_API_URL = "https://export.arxiv.org/api/query"
-PYTHON_DOCS_INDEX = "https://docs.python.org/3/contents.html"
 DOC_SOURCE_INDEXES = (
     ("python_docs_positive", "https://docs.python.org/3/contents.html"),
     ("sklearn_docs_positive", "https://scikit-learn.org/stable/user_guide.html"),
@@ -40,11 +38,6 @@ NEWS_RSS_FEEDS = (
     ("bbc_technology_news_positive", "https://feeds.bbci.co.uk/news/technology/rss.xml"),
     ("npr_news_positive", "https://www.npr.org/rss/rss.php?id=1001"),
 )
-SNOPES_RATING_URLS = (
-    "https://www.snopes.com/fact-check/rating/false/",
-    "https://www.snopes.com/fact-check/rating/mostly-false/",
-)
-POLITIFACT_RULINGS = ("false", "mostly-false", "pants-fire")
 SMS_SPAM_URL = "https://archive.ics.uci.edu/ml/machine-learning-databases/00228/smsspamcollection.zip"
 YOUTUBE_SPAM_URL = "https://archive.ics.uci.edu/ml/machine-learning-databases/00380/YouTube-Spam-Collection-v1.zip"
 SPAMASSASSIN_INDEX_URL = "https://spamassassin.apache.org/old/publiccorpus/"
@@ -85,7 +78,8 @@ def collect_dataset(
     python_docs_pages: int = 200,
     spamassassin_limit: int = 1200,
     news_items_per_feed: int = 80,
-    factcheck_pages_per_ruling: int = 2,
+    max_per_source: int = 280,
+    balance_labels: bool = True,
     random_seed: int = 0,
 ) -> dict[str, int]:
     client = httpx.Client(
@@ -112,7 +106,6 @@ def collect_dataset(
         negatives.extend(sms_negatives)
         negatives.extend(youtube_negatives)
         negatives.extend(spamassassin_negatives)
-        negatives.extend(collect_news_negative_examples(client, pages_per_ruling=factcheck_pages_per_ruling))
 
         hard_positives, hard_negatives = generate_hard_synthetic_examples()
         positives.extend(hard_positives)
@@ -121,6 +114,12 @@ def collect_dataset(
         client.close()
 
     examples = dedupe_examples([*positives, *negatives])
+    examples = balance_examples(
+        examples,
+        max_per_source=max_per_source,
+        balance_labels=balance_labels,
+        seed=random_seed,
+    )
     rng = random.Random(random_seed)
     rng.shuffle(examples)
 
@@ -131,7 +130,11 @@ def collect_dataset(
         "positive": sum(example.label == 1 for example in examples),
         "negative": sum(example.label == 0 for example in examples),
     }
-    return label_counts
+    return {
+        **label_counts,
+        "sources": len({example.source for example in examples}),
+        "max_per_source": max_per_source,
+    }
 
 
 def collect_news_positive_examples(client: httpx.Client, *, items_per_feed: int) -> list[TrustDatasetExample]:
@@ -156,85 +159,6 @@ def collect_news_positive_examples(client: httpx.Client, *, items_per_feed: int)
                     item_id=f"{source_name}:{index}",
                 )
             )
-    return examples
-
-
-def collect_news_negative_examples(client: httpx.Client, *, pages_per_ruling: int) -> list[TrustDatasetExample]:
-    examples: list[TrustDatasetExample] = []
-    examples.extend(collect_snopes_examples(client, limit_per_rating=max(20, pages_per_ruling * 20)))
-    examples.extend(collect_politifact_examples(client, pages_per_ruling=pages_per_ruling))
-    return examples
-
-
-def collect_snopes_examples(client: httpx.Client, *, limit_per_rating: int) -> list[TrustDatasetExample]:
-    examples: list[TrustDatasetExample] = []
-    for rating_url in SNOPES_RATING_URLS:
-        page = client.get(rating_url)
-        page.raise_for_status()
-        links = sorted(set(re.findall(r'href=\"(https://www\\.snopes\\.com/fact-check/[^\"]+/)\"', page.text)))
-        article_links = [link for link in links if "/rating/" not in link][:limit_per_rating]
-        for link in article_links:
-            article = client.get(link)
-            if article.status_code != 200:
-                continue
-            soup = BeautifulSoup(article.text, "html.parser")
-            title = soup.select_one("h1")
-            paragraphs = [
-                node.get_text(" ", strip=True)
-                for node in soup.select("article p")
-                if node.get_text(" ", strip=True) and node.get_text(" ", strip=True).lower() != "about this rating"
-            ]
-            text = normalize_text(
-                title.get_text(" ", strip=True) if title else "",
-                " ".join(paragraphs[:2]),
-            )
-            if not text:
-                continue
-            examples.append(
-                TrustDatasetExample(
-                    text=text,
-                    label=0,
-                    source="snopes_false_negative",
-                    source_url=link,
-                    item_id=link,
-                )
-            )
-    return examples
-
-
-def collect_politifact_examples(client: httpx.Client, *, pages_per_ruling: int) -> list[TrustDatasetExample]:
-    examples: list[TrustDatasetExample] = []
-    for ruling in POLITIFACT_RULINGS:
-        for page_number in range(1, pages_per_ruling + 1):
-            list_url = f"https://www.politifact.com/factchecks/list/?page={page_number}&ruling={ruling}"
-            listing = client.get(list_url)
-            listing.raise_for_status()
-            relative_links = sorted(set(re.findall(r"/factchecks/\d{4}/[a-z]{3}/\d{2}/[^\"']+/", listing.text)))
-            article_links = [urljoin("https://www.politifact.com", link) for link in relative_links]
-            for link in article_links:
-                article = client.get(link)
-                if article.status_code != 200:
-                    continue
-                soup = BeautifulSoup(article.text, "html.parser")
-                title = soup.select_one("h1")
-                description = soup.select_one("meta[name=description]")
-                paragraphs = [node.get_text(" ", strip=True) for node in soup.select(".m-textblock p") if node.get_text(" ", strip=True)]
-                text = normalize_text(
-                    title.get_text(" ", strip=True) if title else "",
-                    description.get("content", "") if description else "",
-                    " ".join(paragraphs[:2]),
-                )
-                if not text:
-                    continue
-                examples.append(
-                    TrustDatasetExample(
-                        text=text,
-                        label=0,
-                        source=f"politifact_{ruling}_negative",
-                        source_url=link,
-                        item_id=link,
-                    )
-                )
     return examples
 
 
@@ -530,6 +454,35 @@ def dedupe_examples(examples: list[TrustDatasetExample]) -> list[TrustDatasetExa
     return deduped
 
 
+def balance_examples(
+    examples: list[TrustDatasetExample],
+    *,
+    max_per_source: int,
+    balance_labels: bool,
+    seed: int,
+) -> list[TrustDatasetExample]:
+    rng = random.Random(seed)
+    by_source: dict[str, list[TrustDatasetExample]] = {}
+    for example in examples:
+        by_source.setdefault(example.source, []).append(example)
+
+    limited: list[TrustDatasetExample] = []
+    for source_examples in by_source.values():
+        rows = list(source_examples)
+        rng.shuffle(rows)
+        limited.extend(rows[:max_per_source])
+
+    if not balance_labels:
+        return limited
+
+    positives = [example for example in limited if example.label == 1]
+    negatives = [example for example in limited if example.label == 0]
+    target = min(len(positives), len(negatives))
+    rng.shuffle(positives)
+    rng.shuffle(negatives)
+    return positives[:target] + negatives[:target]
+
+
 def generate_hard_synthetic_examples() -> tuple[list[TrustDatasetExample], list[TrustDatasetExample]]:
     hard_positives: list[TrustDatasetExample] = []
     hard_negatives: list[TrustDatasetExample] = []
@@ -629,6 +582,19 @@ def embed_texts(texts: list[str], *, embedder: SentenceTransformerEmbedder) -> n
     return embedder.embed(texts)
 
 
+def build_training_matrix(
+    examples: list[TrustDatasetExample],
+    embeddings: np.ndarray,
+    *,
+    config: TrustConfig,
+) -> np.ndarray:
+    rows = []
+    for example, embedding in zip(examples, embeddings):
+        profile = resolve_source_profile(config, example.source_url)
+        rows.append(build_trust_feature_vector(embedding, profile))
+    return np.asarray(rows, dtype=np.float32)
+
+
 def train_trust_head(
     dataset_path: Path,
     output_dir: Path,
@@ -647,8 +613,11 @@ def train_trust_head(
     train_examples, val_examples = stratified_split(examples, val_ratio=val_ratio, seed=seed)
     embedder = SentenceTransformerEmbedder(model_name, device=embedding_device)
 
-    train_x = embed_texts([example.text for example in train_examples], embedder=embedder)
-    val_x = embed_texts([example.text for example in val_examples], embedder=embedder)
+    trust_config = TrustConfig()
+    train_embeddings = embed_texts([example.text for example in train_examples], embedder=embedder)
+    val_embeddings = embed_texts([example.text for example in val_examples], embedder=embedder)
+    train_x = build_training_matrix(train_examples, train_embeddings, config=trust_config)
+    val_x = build_training_matrix(val_examples, val_embeddings, config=trust_config)
     train_y = np.asarray([example.label for example in train_examples], dtype=np.float32)
     val_y = np.asarray([example.label for example in val_examples], dtype=np.float32)
 
@@ -769,7 +738,8 @@ def main() -> int:
     collect_parser.add_argument("--python-docs-pages", type=int, default=200)
     collect_parser.add_argument("--spamassassin-limit", type=int, default=1200)
     collect_parser.add_argument("--news-items-per-feed", type=int, default=80)
-    collect_parser.add_argument("--factcheck-pages-per-ruling", type=int, default=2)
+    collect_parser.add_argument("--max-per-source", type=int, default=280)
+    collect_parser.add_argument("--no-balance-labels", action="store_true")
     collect_parser.add_argument("--seed", type=int, default=0)
 
     train_parser = subparsers.add_parser("train", help="Train a supervised trust head from a collected dataset.")
@@ -808,7 +778,8 @@ def main() -> int:
     run_parser.add_argument("--python-docs-pages", type=int, default=200)
     run_parser.add_argument("--spamassassin-limit", type=int, default=1200)
     run_parser.add_argument("--news-items-per-feed", type=int, default=80)
-    run_parser.add_argument("--factcheck-pages-per-ruling", type=int, default=2)
+    run_parser.add_argument("--max-per-source", type=int, default=280)
+    run_parser.add_argument("--no-balance-labels", action="store_true")
     run_parser.add_argument("--model-name", default="sentence-transformers/all-MiniLM-L6-v2")
     run_parser.add_argument("--embedding-device", default="directml")
     run_parser.add_argument("--hidden-dim", type=int, default=128)
@@ -828,7 +799,8 @@ def main() -> int:
             python_docs_pages=args.python_docs_pages,
             spamassassin_limit=args.spamassassin_limit,
             news_items_per_feed=args.news_items_per_feed,
-            factcheck_pages_per_ruling=args.factcheck_pages_per_ruling,
+            max_per_source=args.max_per_source,
+            balance_labels=not args.no_balance_labels,
             random_seed=args.seed,
         )
         print(json.dumps({"dataset_path": str(args.dataset_out), "counts": counts}, ensure_ascii=False, indent=2))
@@ -857,7 +829,8 @@ def main() -> int:
         python_docs_pages=args.python_docs_pages,
         spamassassin_limit=args.spamassassin_limit,
         news_items_per_feed=args.news_items_per_feed,
-        factcheck_pages_per_ruling=args.factcheck_pages_per_ruling,
+        max_per_source=args.max_per_source,
+        balance_labels=not args.no_balance_labels,
         random_seed=args.seed,
     )
     model_path, metrics = train_trust_head(
