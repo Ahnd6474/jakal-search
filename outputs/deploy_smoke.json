@@ -1,0 +1,1251 @@
+{
+  "root_id": "node-0",
+  "request": {
+    "query": "graph search systems",
+    "max_depth": 3,
+    "max_total_nodes": 24,
+    "frontier_width": 6,
+    "results_per_query": 12,
+    "metadata": {}
+  },
+  "expansions": {
+    "node-0": {
+      "node_id": "node-0",
+      "query": "graph search systems",
+      "depth": 0,
+      "raw_document_ids": [
+        "https://www.puppygraph.com/blog/graph-search-algorithms",
+        "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+        "https://solutionsreview.com/data-management/the-best-graph-databases/",
+        "https://www.tigergraph.com/glossary/graph-search/",
+        "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+        "https://milvus.io/ai-quick-reference/what-is-graphbased-search",
+        "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+        "https://cs.stanford.edu/people/abisee/gs.pdf",
+        "https://www.numberanalytics.com/blog/mastering-graph-search-algorithms",
+        "https://amazingalgorithms.com/definitions/graph-search/"
+      ],
+      "trusted_document_ids": [
+        "https://www.puppygraph.com/blog/graph-search-algorithms",
+        "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+        "https://solutionsreview.com/data-management/the-best-graph-databases/",
+        "https://www.tigergraph.com/glossary/graph-search/",
+        "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+        "https://milvus.io/ai-quick-reference/what-is-graphbased-search",
+        "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+        "https://cs.stanford.edu/people/abisee/gs.pdf",
+        "https://www.numberanalytics.com/blog/mastering-graph-search-algorithms",
+        "https://amazingalgorithms.com/definitions/graph-search/"
+      ],
+      "unique_document_ids": [
+        "https://www.puppygraph.com/blog/graph-search-algorithms",
+        "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+        "https://solutionsreview.com/data-management/the-best-graph-databases/",
+        "https://www.tigergraph.com/glossary/graph-search/",
+        "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+        "https://milvus.io/ai-quick-reference/what-is-graphbased-search",
+        "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+        "https://cs.stanford.edu/people/abisee/gs.pdf",
+        "https://www.numberanalytics.com/blog/mastering-graph-search-algorithms",
+        "https://amazingalgorithms.com/definitions/graph-search/"
+      ],
+      "cluster_ids": [
+        0
+      ],
+      "stop_reason": null,
+      "events": [
+        {
+          "event_type": "expand_started",
+          "node_id": "node-0",
+          "depth": 0,
+          "query": "graph search systems",
+          "payload": {}
+        },
+        {
+          "event_type": "provider_results",
+          "node_id": "node-0",
+          "depth": 0,
+          "query": "graph search systems",
+          "payload": {
+            "count": 10
+          }
+        },
+        {
+          "event_type": "trust_filter",
+          "node_id": "node-0",
+          "depth": 0,
+          "query": "graph search systems",
+          "payload": {
+            "count": 10
+          }
+        },
+        {
+          "event_type": "dedupe",
+          "node_id": "node-0",
+          "depth": 0,
+          "query": "graph search systems",
+          "payload": {
+            "count": 10
+          }
+        },
+        {
+          "event_type": "clustering",
+          "node_id": "node-0",
+          "depth": 0,
+          "query": "graph search systems",
+          "payload": {
+            "count": 1
+          }
+        },
+        {
+          "event_type": "expand_completed",
+          "node_id": "node-0",
+          "depth": 0,
+          "query": "graph search systems",
+          "payload": {
+            "children_kept": 1,
+            "children_pruned": 0
+          }
+        }
+      ]
+    },
+    "node-1": {
+      "node_id": "node-1",
+      "query": "graph search systems data",
+      "depth": 1,
+      "raw_document_ids": [
+        "https://www.puppygraph.com/blog/graph-search-algorithms",
+        "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+        "https://arxiv.org/html/2411.09999v1",
+        "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+        "https://cs.stanford.edu/people/abisee/gs.pdf",
+        "https://towardsdatascience.com/graph-search-an-intuitive-introduction-to-both-traversal-and-search-behaviour-e9c5f4dd230/",
+        "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+        "https://www.index.dev/blog/open-source-graph-databases",
+        "https://milvus.io/ai-quick-reference/what-is-graphbased-search",
+        "https://www.numberanalytics.com/blog/mastering-graph-search-algorithms"
+      ],
+      "trusted_document_ids": [
+        "https://www.puppygraph.com/blog/graph-search-algorithms",
+        "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+        "https://arxiv.org/html/2411.09999v1",
+        "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+        "https://cs.stanford.edu/people/abisee/gs.pdf",
+        "https://towardsdatascience.com/graph-search-an-intuitive-introduction-to-both-traversal-and-search-behaviour-e9c5f4dd230/",
+        "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+        "https://www.index.dev/blog/open-source-graph-databases",
+        "https://milvus.io/ai-quick-reference/what-is-graphbased-search",
+        "https://www.numberanalytics.com/blog/mastering-graph-search-algorithms"
+      ],
+      "unique_document_ids": [
+        "https://www.puppygraph.com/blog/graph-search-algorithms",
+        "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+        "https://arxiv.org/html/2411.09999v1",
+        "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+        "https://cs.stanford.edu/people/abisee/gs.pdf",
+        "https://towardsdatascience.com/graph-search-an-intuitive-introduction-to-both-traversal-and-search-behaviour-e9c5f4dd230/",
+        "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+        "https://www.index.dev/blog/open-source-graph-databases",
+        "https://milvus.io/ai-quick-reference/what-is-graphbased-search",
+        "https://www.numberanalytics.com/blog/mastering-graph-search-algorithms"
+      ],
+      "cluster_ids": [
+        0
+      ],
+      "stop_reason": null,
+      "events": [
+        {
+          "event_type": "expand_started",
+          "node_id": "node-1",
+          "depth": 1,
+          "query": "graph search systems data",
+          "payload": {}
+        },
+        {
+          "event_type": "provider_results",
+          "node_id": "node-1",
+          "depth": 1,
+          "query": "graph search systems data",
+          "payload": {
+            "count": 10
+          }
+        },
+        {
+          "event_type": "trust_filter",
+          "node_id": "node-1",
+          "depth": 1,
+          "query": "graph search systems data",
+          "payload": {
+            "count": 10
+          }
+        },
+        {
+          "event_type": "dedupe",
+          "node_id": "node-1",
+          "depth": 1,
+          "query": "graph search systems data",
+          "payload": {
+            "count": 10
+          }
+        },
+        {
+          "event_type": "clustering",
+          "node_id": "node-1",
+          "depth": 1,
+          "query": "graph search systems data",
+          "payload": {
+            "count": 1
+          }
+        },
+        {
+          "event_type": "expand_completed",
+          "node_id": "node-1",
+          "depth": 1,
+          "query": "graph search systems data",
+          "payload": {
+            "children_kept": 1,
+            "children_pruned": 0
+          }
+        }
+      ]
+    },
+    "node-2": {
+      "node_id": "node-2",
+      "query": "graph search systems data guide",
+      "depth": 2,
+      "raw_document_ids": [
+        "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+        "https://www.puppygraph.com/blog/graph-search-algorithms",
+        "https://arxiv.org/abs/2411.09999",
+        "https://cs.stanford.edu/people/abisee/gs.pdf",
+        "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+        "https://www.numberanalytics.com/blog/ultimate-graph-search-guide",
+        "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+        "https://www.geeksforgeeks.org/dsa/graph-data-structure-and-algorithms/",
+        "https://arxiv.org/html/2411.09999v1",
+        "https://go.neo4j.com/rs/710-RRC-335/images/Comprehensive-Guide-to-Graph-Algorithms-in-Neo4j-ebook-EN-US.pdf"
+      ],
+      "trusted_document_ids": [
+        "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+        "https://www.puppygraph.com/blog/graph-search-algorithms",
+        "https://arxiv.org/abs/2411.09999",
+        "https://cs.stanford.edu/people/abisee/gs.pdf",
+        "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+        "https://www.numberanalytics.com/blog/ultimate-graph-search-guide",
+        "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+        "https://www.geeksforgeeks.org/dsa/graph-data-structure-and-algorithms/",
+        "https://arxiv.org/html/2411.09999v1",
+        "https://go.neo4j.com/rs/710-RRC-335/images/Comprehensive-Guide-to-Graph-Algorithms-in-Neo4j-ebook-EN-US.pdf"
+      ],
+      "unique_document_ids": [
+        "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+        "https://www.puppygraph.com/blog/graph-search-algorithms",
+        "https://arxiv.org/abs/2411.09999",
+        "https://cs.stanford.edu/people/abisee/gs.pdf",
+        "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+        "https://www.numberanalytics.com/blog/ultimate-graph-search-guide",
+        "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+        "https://www.geeksforgeeks.org/dsa/graph-data-structure-and-algorithms/",
+        "https://arxiv.org/html/2411.09999v1",
+        "https://go.neo4j.com/rs/710-RRC-335/images/Comprehensive-Guide-to-Graph-Algorithms-in-Neo4j-ebook-EN-US.pdf"
+      ],
+      "cluster_ids": [
+        0
+      ],
+      "stop_reason": "all_clusters_pruned",
+      "events": [
+        {
+          "event_type": "expand_started",
+          "node_id": "node-2",
+          "depth": 2,
+          "query": "graph search systems data guide",
+          "payload": {}
+        },
+        {
+          "event_type": "provider_results",
+          "node_id": "node-2",
+          "depth": 2,
+          "query": "graph search systems data guide",
+          "payload": {
+            "count": 10
+          }
+        },
+        {
+          "event_type": "trust_filter",
+          "node_id": "node-2",
+          "depth": 2,
+          "query": "graph search systems data guide",
+          "payload": {
+            "count": 10
+          }
+        },
+        {
+          "event_type": "dedupe",
+          "node_id": "node-2",
+          "depth": 2,
+          "query": "graph search systems data guide",
+          "payload": {
+            "count": 10
+          }
+        },
+        {
+          "event_type": "clustering",
+          "node_id": "node-2",
+          "depth": 2,
+          "query": "graph search systems data guide",
+          "payload": {
+            "count": 1
+          }
+        },
+        {
+          "event_type": "expand_stopped",
+          "node_id": "node-2",
+          "depth": 2,
+          "query": "graph search systems data guide",
+          "payload": {
+            "reason": "all_clusters_pruned"
+          }
+        }
+      ]
+    }
+  },
+  "logs": [
+    {
+      "event_type": "search_started",
+      "node_id": "node-0",
+      "depth": 0,
+      "query": "graph search systems",
+      "payload": {
+        "max_depth": 3,
+        "max_total_nodes": 24,
+        "frontier_width": 6,
+        "results_per_query": 12
+      }
+    },
+    {
+      "event_type": "expand_started",
+      "node_id": "node-0",
+      "depth": 0,
+      "query": "graph search systems",
+      "payload": {}
+    },
+    {
+      "event_type": "provider_results",
+      "node_id": "node-0",
+      "depth": 0,
+      "query": "graph search systems",
+      "payload": {
+        "count": 10
+      }
+    },
+    {
+      "event_type": "trust_filter",
+      "node_id": "node-0",
+      "depth": 0,
+      "query": "graph search systems",
+      "payload": {
+        "count": 10
+      }
+    },
+    {
+      "event_type": "dedupe",
+      "node_id": "node-0",
+      "depth": 0,
+      "query": "graph search systems",
+      "payload": {
+        "count": 10
+      }
+    },
+    {
+      "event_type": "clustering",
+      "node_id": "node-0",
+      "depth": 0,
+      "query": "graph search systems",
+      "payload": {
+        "count": 1
+      }
+    },
+    {
+      "event_type": "expand_completed",
+      "node_id": "node-0",
+      "depth": 0,
+      "query": "graph search systems",
+      "payload": {
+        "children_kept": 1,
+        "children_pruned": 0
+      }
+    },
+    {
+      "event_type": "expand_started",
+      "node_id": "node-1",
+      "depth": 1,
+      "query": "graph search systems data",
+      "payload": {}
+    },
+    {
+      "event_type": "provider_results",
+      "node_id": "node-1",
+      "depth": 1,
+      "query": "graph search systems data",
+      "payload": {
+        "count": 10
+      }
+    },
+    {
+      "event_type": "trust_filter",
+      "node_id": "node-1",
+      "depth": 1,
+      "query": "graph search systems data",
+      "payload": {
+        "count": 10
+      }
+    },
+    {
+      "event_type": "dedupe",
+      "node_id": "node-1",
+      "depth": 1,
+      "query": "graph search systems data",
+      "payload": {
+        "count": 10
+      }
+    },
+    {
+      "event_type": "clustering",
+      "node_id": "node-1",
+      "depth": 1,
+      "query": "graph search systems data",
+      "payload": {
+        "count": 1
+      }
+    },
+    {
+      "event_type": "expand_completed",
+      "node_id": "node-1",
+      "depth": 1,
+      "query": "graph search systems data",
+      "payload": {
+        "children_kept": 1,
+        "children_pruned": 0
+      }
+    },
+    {
+      "event_type": "expand_started",
+      "node_id": "node-2",
+      "depth": 2,
+      "query": "graph search systems data guide",
+      "payload": {}
+    },
+    {
+      "event_type": "provider_results",
+      "node_id": "node-2",
+      "depth": 2,
+      "query": "graph search systems data guide",
+      "payload": {
+        "count": 10
+      }
+    },
+    {
+      "event_type": "trust_filter",
+      "node_id": "node-2",
+      "depth": 2,
+      "query": "graph search systems data guide",
+      "payload": {
+        "count": 10
+      }
+    },
+    {
+      "event_type": "dedupe",
+      "node_id": "node-2",
+      "depth": 2,
+      "query": "graph search systems data guide",
+      "payload": {
+        "count": 10
+      }
+    },
+    {
+      "event_type": "clustering",
+      "node_id": "node-2",
+      "depth": 2,
+      "query": "graph search systems data guide",
+      "payload": {
+        "count": 1
+      }
+    },
+    {
+      "event_type": "expand_stopped",
+      "node_id": "node-2",
+      "depth": 2,
+      "query": "graph search systems data guide",
+      "payload": {
+        "reason": "all_clusters_pruned"
+      }
+    }
+  ],
+  "nodes": {
+    "node-0": {
+      "query": "graph search systems",
+      "depth": 0,
+      "parent_id": null,
+      "score": 1.0,
+      "cluster_label": "",
+      "status": "expanded",
+      "stop_reason": null,
+      "children": [
+        "node-1"
+      ],
+      "metrics": {
+        "result_count": 10,
+        "trusted_count": 10,
+        "unique_count": 10
+      },
+      "docs": [
+        {
+          "document_id": "https://www.puppygraph.com/blog/graph-search-algorithms",
+          "title": "Graph Search Algorithms: A Practical Overview",
+          "snippet": "Embark on a journey through the intricate landscape of graph search algorithms, from classical uninformed methods like BFS and DFS to informed approaches like Dijkstra's and A*.",
+          "content": "Embark on a journey through the intricate landscape of graph search algorithms, from classical uninformed methods like BFS and DFS to informed approaches like Dijkstra's and A*.",
+          "url": "https://www.puppygraph.com/blog/graph-search-algorithms",
+          "source": "puppygraph.com",
+          "query": "graph search systems",
+          "rank": 1,
+          "trust_score": 0.8701333999633789,
+          "claim_falsehood_score": 0.5113873481750488,
+          "semantic_risk": 0.1298666000366211,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "puppygraph.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+          "title": "Graph Search Algorithms: Developer's Guide",
+          "snippet": "Graph search algorithms form the backbone of many applications, from social network analysis and route planning to data mining and recommendation systems . In this developer's guide, we will delve into the world of graph search algorithms, exploring their definition, significance, and practical applications. At its core, a graph search algorithm is a technique used to traverse a graph , which is ...",
+          "content": "Graph search algorithms form the backbone of many applications, from social network analysis and route planning to data mining and recommendation systems . In this developer's guide, we will delve into the world of graph search algorithms, exploring their definition, significance, and practical applications. At its core, a graph search algorithm is a technique used to traverse a graph , which is ...",
+          "url": "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+          "source": "memgraph.com",
+          "query": "graph search systems",
+          "rank": 2,
+          "trust_score": 0.6851636171340942,
+          "claim_falsehood_score": 0.49202534556388855,
+          "semantic_risk": 0.31483638286590576,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "memgraph.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://solutionsreview.com/data-management/the-best-graph-databases/",
+          "title": "The 12 Best Graph Databases to Consider for 2026 - Solutions Review",
+          "snippet": "Solutions Review has compiled this list of the best graph databases to consider based on real user reviews and product roadmaps.",
+          "content": "Solutions Review has compiled this list of the best graph databases to consider based on real user reviews and product roadmaps.",
+          "url": "https://solutionsreview.com/data-management/the-best-graph-databases/",
+          "source": "solutionsreview.com",
+          "query": "graph search systems",
+          "rank": 3,
+          "trust_score": 0.8572145104408264,
+          "claim_falsehood_score": 0.45921996235847473,
+          "semantic_risk": 0.14278548955917358,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "solutionsreview.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://www.tigergraph.com/glossary/graph-search/",
+          "title": "Graph Search - TigerGraph",
+          "snippet": "Explore the power of graph search beyond simple keyword lookups. Learn how this relationship-focused approach enables multi-hop traversals, pattern recognition, and real-time insights across finance, healthcare, retail, cybersecurity, and telecommunications—delivering faster queries and actionable business intelligence from complex, interconnected data.",
+          "content": "Explore the power of graph search beyond simple keyword lookups. Learn how this relationship-focused approach enables multi-hop traversals, pattern recognition, and real-time insights across finance, healthcare, retail, cybersecurity, and telecommunications—delivering faster queries and actionable business intelligence from complex, interconnected data.",
+          "url": "https://www.tigergraph.com/glossary/graph-search/",
+          "source": "tigergraph.com",
+          "query": "graph search systems",
+          "rank": 4,
+          "trust_score": 0.850703775882721,
+          "claim_falsehood_score": 0.4964829683303833,
+          "semantic_risk": 0.14929622411727905,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "tigergraph.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+          "title": "Key Algorithms - Graph Search Algorithms | Pete Bleackley",
+          "snippet": "Graph Search Algorithms There are many applications in which we might wish to navigate our way through a graph of nodes and edges - route finding for satnav systems , controlling character movement in video games, routing traffic on the Internet, crawling the web for a search engine, or finding information in a vector database, for example.",
+          "content": "Graph Search Algorithms There are many applications in which we might wish to navigate our way through a graph of nodes and edges - route finding for satnav systems , controlling character movement in video games, routing traffic on the Internet, crawling the web for a search engine, or finding information in a vector database, for example.",
+          "url": "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+          "source": "petebleackley.github.io",
+          "query": "graph search systems",
+          "rank": 5,
+          "trust_score": 0.7779985666275024,
+          "claim_falsehood_score": 0.501214861869812,
+          "semantic_risk": 0.22200143337249756,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "petebleackley.github.io",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://milvus.io/ai-quick-reference/what-is-graphbased-search",
+          "title": "What is graph-based search? - milvus.io",
+          "snippet": "Graph -based search is a method for exploring data structured as nodes (entities) and edges (relationships) to find specific information or paths. Unlike linear data structures like arrays, graphs allow flexible traversal through interconnected elements.",
+          "content": "Graph -based search is a method for exploring data structured as nodes (entities) and edges (relationships) to find specific information or paths. Unlike linear data structures like arrays, graphs allow flexible traversal through interconnected elements.",
+          "url": "https://milvus.io/ai-quick-reference/what-is-graphbased-search",
+          "source": "milvus.io",
+          "query": "graph search systems",
+          "rank": 6,
+          "trust_score": 0.8096296787261963,
+          "claim_falsehood_score": 0.5098934769630432,
+          "semantic_risk": 0.1903703212738037,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "milvus.io",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+          "title": "Graph Database for Beginners: Graph Search Algorithms Basics",
+          "snippet": "Explore the world of graph search algorithms, learn the basics of depth- and breadth-first, and how to use Dijkstra's and A-star algorithms.",
+          "content": "Explore the world of graph search algorithms, learn the basics of depth- and breadth-first, and how to use Dijkstra's and A-star algorithms.",
+          "url": "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+          "source": "neo4j.com",
+          "query": "graph search systems",
+          "rank": 7,
+          "trust_score": 0.7616825103759766,
+          "claim_falsehood_score": 0.4879191219806671,
+          "semantic_risk": 0.23831748962402344,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "neo4j.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://cs.stanford.edu/people/abisee/gs.pdf",
+          "title": "PDF Graph Search Algorithms - Computer Science",
+          "snippet": "Graph Traversal Algorithms These algorithms specify an order to search through the nodes of a graph . We start at the source node and keep searching until we find the target node. The frontier contains nodes that we've seen but haven't explored yet. Each iteration, we take a node off the frontier, and add its neighbors to the frontier.",
+          "content": "Graph Traversal Algorithms These algorithms specify an order to search through the nodes of a graph . We start at the source node and keep searching until we find the target node. The frontier contains nodes that we've seen but haven't explored yet. Each iteration, we take a node off the frontier, and add its neighbors to the frontier.",
+          "url": "https://cs.stanford.edu/people/abisee/gs.pdf",
+          "source": "cs.stanford.edu",
+          "query": "graph search systems",
+          "rank": 8,
+          "trust_score": 0.8493704199790955,
+          "claim_falsehood_score": 0.49587205052375793,
+          "semantic_risk": 0.15062958002090454,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "cs.stanford.edu",
+            "domain_score": 0.88,
+            "source_type": "academic",
+            "matched_rule": ".edu",
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://www.numberanalytics.com/blog/mastering-graph-search-algorithms",
+          "title": "Mastering Graph Search Algorithms - numberanalytics.com",
+          "snippet": "Unlock the power of graph search algorithms and discover how they can be applied to real-world problems, from social networks to traffic routing.",
+          "content": "Unlock the power of graph search algorithms and discover how they can be applied to real-world problems, from social networks to traffic routing.",
+          "url": "https://www.numberanalytics.com/blog/mastering-graph-search-algorithms",
+          "source": "numberanalytics.com",
+          "query": "graph search systems",
+          "rank": 9,
+          "trust_score": 0.8760882616043091,
+          "claim_falsehood_score": 0.49327099323272705,
+          "semantic_risk": 0.12391173839569092,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "numberanalytics.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://amazingalgorithms.com/definitions/graph-search/",
+          "title": "What is Graph search? - Definition from Amazing Algorithms",
+          "snippet": "Graph search is a computer science technique that uses graphs to represent relationships between data, allowing efficient traversal and retrieval of connected information. It enables complex data analysis and problem-solving by modeling real-world connections as nodes and edges within the graph .",
+          "content": "Graph search is a computer science technique that uses graphs to represent relationships between data, allowing efficient traversal and retrieval of connected information. It enables complex data analysis and problem-solving by modeling real-world connections as nodes and edges within the graph .",
+          "url": "https://amazingalgorithms.com/definitions/graph-search/",
+          "source": "amazingalgorithms.com",
+          "query": "graph search systems",
+          "rank": 10,
+          "trust_score": 0.893825352191925,
+          "claim_falsehood_score": 0.5171237587928772,
+          "semantic_risk": 0.10617464780807495,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "amazingalgorithms.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        }
+      ]
+    },
+    "node-1": {
+      "query": "graph search systems data",
+      "depth": 1,
+      "parent_id": "node-0",
+      "score": 0.9999958276748657,
+      "cluster_label": "algorithms, search algorithms, data",
+      "status": "expanded",
+      "stop_reason": null,
+      "children": [
+        "node-2"
+      ],
+      "metrics": {
+        "novelty": 1.0,
+        "trust": 0.8007,
+        "scope": 0.8098,
+        "support": 0.5,
+        "vector_consistency": 0.9716,
+        "drift": 0.0183,
+        "keyword_count": 6,
+        "evidence_count": 3,
+        "decision_reason": "branch_model",
+        "cluster_size": 6,
+        "result_count": 10,
+        "trusted_count": 10,
+        "unique_count": 10
+      },
+      "docs": [
+        {
+          "document_id": "https://www.puppygraph.com/blog/graph-search-algorithms",
+          "title": "Graph Search Algorithms: A Practical Overview",
+          "snippet": "Web search The internet is a huge graph of pages linked by hyperlinks. Search engines use variations of graph techniques to crawl websites, rank them, and return the most relevant content to users. Network routing and load balancing Data moves through a network from node to node, with each connection having certain bandwidth or latency constraints.",
+          "content": "Web search The internet is a huge graph of pages linked by hyperlinks. Search engines use variations of graph techniques to crawl websites, rank them, and return the most relevant content to users. Network routing and load balancing Data moves through a network from node to node, with each connection having certain bandwidth or latency constraints.",
+          "url": "https://www.puppygraph.com/blog/graph-search-algorithms",
+          "source": "puppygraph.com",
+          "query": "graph search systems data",
+          "rank": 1,
+          "trust_score": 0.7856131792068481,
+          "claim_falsehood_score": 0.5012657642364502,
+          "semantic_risk": 0.21438682079315186,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "puppygraph.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+          "title": "Graph Search Algorithms: Developer's Guide",
+          "snippet": "Graph search algorithms form the backbone of many applications, from social network analysis and route planning to data mining and recommendation systems . In this developer's guide, we will delve into the world of graph search algorithms, exploring their definition, significance, and practical applications. At its core, a graph search algorithm is a technique used to traverse a graph , which is ...",
+          "content": "Graph search algorithms form the backbone of many applications, from social network analysis and route planning to data mining and recommendation systems . In this developer's guide, we will delve into the world of graph search algorithms, exploring their definition, significance, and practical applications. At its core, a graph search algorithm is a technique used to traverse a graph , which is ...",
+          "url": "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+          "source": "memgraph.com",
+          "query": "graph search systems data",
+          "rank": 2,
+          "trust_score": 0.6851636171340942,
+          "claim_falsehood_score": 0.49202534556388855,
+          "semantic_risk": 0.31483638286590576,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "memgraph.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://arxiv.org/html/2411.09999v1",
+          "title": "Understanding Graph Databases: A Comprehensive Tutorial and Survey",
+          "snippet": "Graph databases, as discussed in the tutorial, offer advantages over traditional relational databases by enabling efficient management of complex, interconnected data . Overall, this paper discusses prominent graph database systems like Neo4j, Amazon Neptune, and ArangoDB, each with unique features for handling large datasets.",
+          "content": "Graph databases, as discussed in the tutorial, offer advantages over traditional relational databases by enabling efficient management of complex, interconnected data . Overall, this paper discusses prominent graph database systems like Neo4j, Amazon Neptune, and ArangoDB, each with unique features for handling large datasets.",
+          "url": "https://arxiv.org/html/2411.09999v1",
+          "source": "arxiv.org",
+          "query": "graph search systems data",
+          "rank": 3,
+          "trust_score": 0.9745423197746277,
+          "claim_falsehood_score": 0.5005999207496643,
+          "semantic_risk": 0.025457680225372314,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "arxiv.org",
+            "domain_score": 0.9,
+            "source_type": "research",
+            "matched_rule": "arxiv.org",
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+          "title": "Graph Database for Beginners: Graph Search Algorithms Basics",
+          "snippet": "Explore the world of graph search algorithms, learn the basics of depth- and breadth-first, and how to use Dijkstra's and A-star algorithms.",
+          "content": "Explore the world of graph search algorithms, learn the basics of depth- and breadth-first, and how to use Dijkstra's and A-star algorithms.",
+          "url": "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+          "source": "neo4j.com",
+          "query": "graph search systems data",
+          "rank": 4,
+          "trust_score": 0.7616825103759766,
+          "claim_falsehood_score": 0.4879191219806671,
+          "semantic_risk": 0.23831748962402344,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "neo4j.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://cs.stanford.edu/people/abisee/gs.pdf",
+          "title": "PDF Graph Search Algorithms - Computer Science",
+          "snippet": "Graph Traversal Algorithms These algorithms specify an order to search through the nodes of a graph . We start at the source node and keep searching until we find the target node. The frontier contains nodes that we've seen but haven't explored yet. Each iteration, we take a node off the frontier, and add its neighbors to the frontier.",
+          "content": "Graph Traversal Algorithms These algorithms specify an order to search through the nodes of a graph . We start at the source node and keep searching until we find the target node. The frontier contains nodes that we've seen but haven't explored yet. Each iteration, we take a node off the frontier, and add its neighbors to the frontier.",
+          "url": "https://cs.stanford.edu/people/abisee/gs.pdf",
+          "source": "cs.stanford.edu",
+          "query": "graph search systems data",
+          "rank": 5,
+          "trust_score": 0.8493704199790955,
+          "claim_falsehood_score": 0.49587205052375793,
+          "semantic_risk": 0.15062958002090454,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "cs.stanford.edu",
+            "domain_score": 0.88,
+            "source_type": "academic",
+            "matched_rule": ".edu",
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://towardsdatascience.com/graph-search-an-intuitive-introduction-to-both-traversal-and-search-behaviour-e9c5f4dd230/",
+          "title": "Graph Search, an Intuitive Introduction to both Traversal and Search ...",
+          "snippet": "Think about it, breadth-first search and depth-first search alone have multiple applications, ranging from pathfinding, GPS systems , file systems , tracking an Uber, and much more!",
+          "content": "Think about it, breadth-first search and depth-first search alone have multiple applications, ranging from pathfinding, GPS systems , file systems , tracking an Uber, and much more!",
+          "url": "https://towardsdatascience.com/graph-search-an-intuitive-introduction-to-both-traversal-and-search-behaviour-e9c5f4dd230/",
+          "source": "towardsdatascience.com",
+          "query": "graph search systems data",
+          "rank": 6,
+          "trust_score": 0.9136297702789307,
+          "claim_falsehood_score": 0.48736655712127686,
+          "semantic_risk": 0.08637022972106934,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "towardsdatascience.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+          "title": "Key Algorithms - Graph Search Algorithms | Pete Bleackley",
+          "snippet": "Graph Search Algorithms There are many applications in which we might wish to navigate our way through a graph of nodes and edges - route finding for satnav systems , controlling character movement in video games, routing traffic on the Internet, crawling the web for a search engine, or finding information in a vector database, for example.",
+          "content": "Graph Search Algorithms There are many applications in which we might wish to navigate our way through a graph of nodes and edges - route finding for satnav systems , controlling character movement in video games, routing traffic on the Internet, crawling the web for a search engine, or finding information in a vector database, for example.",
+          "url": "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+          "source": "petebleackley.github.io",
+          "query": "graph search systems data",
+          "rank": 7,
+          "trust_score": 0.7779985666275024,
+          "claim_falsehood_score": 0.501214861869812,
+          "semantic_risk": 0.22200143337249756,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "petebleackley.github.io",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://www.index.dev/blog/open-source-graph-databases",
+          "title": "Top 10 Open Source Graph Databases in 2026",
+          "snippet": "Get into the core concepts, architecture, use cases, and performance characteristics of the top 10 open source graph databases.",
+          "content": "Get into the core concepts, architecture, use cases, and performance characteristics of the top 10 open source graph databases.",
+          "url": "https://www.index.dev/blog/open-source-graph-databases",
+          "source": "index.dev",
+          "query": "graph search systems data",
+          "rank": 8,
+          "trust_score": 0.8582203388214111,
+          "claim_falsehood_score": 0.4693084955215454,
+          "semantic_risk": 0.14177966117858887,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "index.dev",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://milvus.io/ai-quick-reference/what-is-graphbased-search",
+          "title": "What is graph-based search? - milvus.io",
+          "snippet": "Graph -based search is a method for exploring data structured as nodes (entities) and edges (relationships) to find specific information or paths. Unlike linear data structures like arrays, graphs allow flexible traversal through interconnected elements.",
+          "content": "Graph -based search is a method for exploring data structured as nodes (entities) and edges (relationships) to find specific information or paths. Unlike linear data structures like arrays, graphs allow flexible traversal through interconnected elements.",
+          "url": "https://milvus.io/ai-quick-reference/what-is-graphbased-search",
+          "source": "milvus.io",
+          "query": "graph search systems data",
+          "rank": 9,
+          "trust_score": 0.8096296787261963,
+          "claim_falsehood_score": 0.5098934769630432,
+          "semantic_risk": 0.1903703212738037,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "milvus.io",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://www.numberanalytics.com/blog/mastering-graph-search-algorithms",
+          "title": "Mastering Graph Search Algorithms - numberanalytics.com",
+          "snippet": "Graph search algorithms are a fundamental component of computer science, used to traverse and search through graph data structures. A graph is a non-linear data structure consisting of nodes or vertices connected by edges.",
+          "content": "Graph search algorithms are a fundamental component of computer science, used to traverse and search through graph data structures. A graph is a non-linear data structure consisting of nodes or vertices connected by edges.",
+          "url": "https://www.numberanalytics.com/blog/mastering-graph-search-algorithms",
+          "source": "numberanalytics.com",
+          "query": "graph search systems data",
+          "rank": 10,
+          "trust_score": 0.9035402536392212,
+          "claim_falsehood_score": 0.506144106388092,
+          "semantic_risk": 0.09645974636077881,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "numberanalytics.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        }
+      ]
+    },
+    "node-2": {
+      "query": "graph search systems data guide",
+      "depth": 2,
+      "parent_id": "node-1",
+      "score": 0.9999972581863403,
+      "cluster_label": "algorithms, search algorithms, guide",
+      "status": "stopped",
+      "stop_reason": "all_clusters_pruned",
+      "children": [],
+      "metrics": {
+        "novelty": 1.0,
+        "trust": 0.8084,
+        "scope": 0.7933,
+        "support": 0.4167,
+        "vector_consistency": 0.9804,
+        "drift": 0.0321,
+        "keyword_count": 6,
+        "evidence_count": 3,
+        "decision_reason": "branch_model",
+        "cluster_size": 5,
+        "result_count": 10,
+        "trusted_count": 10,
+        "unique_count": 10
+      },
+      "docs": [
+        {
+          "document_id": "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+          "title": "Graph Search Algorithms: Developer's Guide",
+          "snippet": "Graph search algorithms form the backbone of many applications, from social network analysis and route planning to data mining and recommendation systems . In this developer's guide , we will delve into the world of graph search algorithms, exploring their definition, significance, and practical applications. At its core, a graph search algorithm is a technique used to traverse a graph , which is ...",
+          "content": "Graph search algorithms form the backbone of many applications, from social network analysis and route planning to data mining and recommendation systems . In this developer's guide , we will delve into the world of graph search algorithms, exploring their definition, significance, and practical applications. At its core, a graph search algorithm is a technique used to traverse a graph , which is ...",
+          "url": "https://memgraph.com/blog/graph-search-algorithms-developers-guide",
+          "source": "memgraph.com",
+          "query": "graph search systems data guide",
+          "rank": 1,
+          "trust_score": 0.6851636171340942,
+          "claim_falsehood_score": 0.49202534556388855,
+          "semantic_risk": 0.31483638286590576,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "memgraph.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://www.puppygraph.com/blog/graph-search-algorithms",
+          "title": "Graph Search Algorithms: A Practical Overview",
+          "snippet": "Graph search algorithms guide the way we analyze connected data , from finding routes in traffic networks to detecting relationships in social platforms. While various techniques, including DFS, BFS, Dijkstra's, and A*, have unique methodologies, many of them fit into a broader family known as Best-First Search .",
+          "content": "Graph search algorithms guide the way we analyze connected data , from finding routes in traffic networks to detecting relationships in social platforms. While various techniques, including DFS, BFS, Dijkstra's, and A*, have unique methodologies, many of them fit into a broader family known as Best-First Search .",
+          "url": "https://www.puppygraph.com/blog/graph-search-algorithms",
+          "source": "puppygraph.com",
+          "query": "graph search systems data guide",
+          "rank": 2,
+          "trust_score": 0.837796151638031,
+          "claim_falsehood_score": 0.5076314806938171,
+          "semantic_risk": 0.162203848361969,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "puppygraph.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://arxiv.org/abs/2411.09999",
+          "title": "Understanding Graph Databases: A Comprehensive Tutorial and Survey",
+          "snippet": "This tutorial serves as a comprehensive guide for understanding graph databases, focusing on the fundamentals of graph theory while showcasing practical applications across various fields. It starts by introducing foundational concepts and delves into the structure of graphs through nodes and edges, covering different types such as undirected, directed, weighted, and unweighted graphs . Key ...",
+          "content": "This tutorial serves as a comprehensive guide for understanding graph databases, focusing on the fundamentals of graph theory while showcasing practical applications across various fields. It starts by introducing foundational concepts and delves into the structure of graphs through nodes and edges, covering different types such as undirected, directed, weighted, and unweighted graphs . Key ...",
+          "url": "https://arxiv.org/abs/2411.09999",
+          "source": "arxiv.org",
+          "query": "graph search systems data guide",
+          "rank": 3,
+          "trust_score": 0.9620164036750793,
+          "claim_falsehood_score": 0.4899902641773224,
+          "semantic_risk": 0.037983596324920654,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "arxiv.org",
+            "domain_score": 0.9,
+            "source_type": "research",
+            "matched_rule": "arxiv.org",
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://cs.stanford.edu/people/abisee/gs.pdf",
+          "title": "PDF Graph Search Algorithms - Computer Science",
+          "snippet": "Graph Traversal Algorithms These algorithms specify an order to search through the nodes of a graph . We start at the source node and keep searching until we find the target node. The frontier contains nodes that we've seen but haven't explored yet. Each iteration, we take a node off the frontier, and add its neighbors to the frontier.",
+          "content": "Graph Traversal Algorithms These algorithms specify an order to search through the nodes of a graph . We start at the source node and keep searching until we find the target node. The frontier contains nodes that we've seen but haven't explored yet. Each iteration, we take a node off the frontier, and add its neighbors to the frontier.",
+          "url": "https://cs.stanford.edu/people/abisee/gs.pdf",
+          "source": "cs.stanford.edu",
+          "query": "graph search systems data guide",
+          "rank": 4,
+          "trust_score": 0.8493704199790955,
+          "claim_falsehood_score": 0.49587205052375793,
+          "semantic_risk": 0.15062958002090454,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "cs.stanford.edu",
+            "domain_score": 0.88,
+            "source_type": "academic",
+            "matched_rule": ".edu",
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+          "title": "Graph Database for Beginners: Graph Search Algorithms Basics",
+          "snippet": "Explore the world of graph search algorithms, learn the basics of depth- and breadth-first, and how to use Dijkstra's and A-star algorithms.",
+          "content": "Explore the world of graph search algorithms, learn the basics of depth- and breadth-first, and how to use Dijkstra's and A-star algorithms.",
+          "url": "https://neo4j.com/blog/graph-data-science/graph-search-algorithm-basics/",
+          "source": "neo4j.com",
+          "query": "graph search systems data guide",
+          "rank": 5,
+          "trust_score": 0.7616825103759766,
+          "claim_falsehood_score": 0.4879191219806671,
+          "semantic_risk": 0.23831748962402344,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "neo4j.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://www.numberanalytics.com/blog/ultimate-graph-search-guide",
+          "title": "The Ultimate Graph Search Guide - numberanalytics.com",
+          "snippet": "Fundamentals of Graph Searching Graph searching is a fundamental concept in computer science and graph theory, enabling the traversal and exploration of complex graph structures. Graphs are non-linear data structures consisting of nodes (also known as vertices) connected by edges.",
+          "content": "Fundamentals of Graph Searching Graph searching is a fundamental concept in computer science and graph theory, enabling the traversal and exploration of complex graph structures. Graphs are non-linear data structures consisting of nodes (also known as vertices) connected by edges.",
+          "url": "https://www.numberanalytics.com/blog/ultimate-graph-search-guide",
+          "source": "numberanalytics.com",
+          "query": "graph search systems data guide",
+          "rank": 6,
+          "trust_score": 0.8734652996063232,
+          "claim_falsehood_score": 0.49827882647514343,
+          "semantic_risk": 0.12653470039367676,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "numberanalytics.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+          "title": "Key Algorithms - Graph Search Algorithms | Pete Bleackley",
+          "snippet": "Graph Search Algorithms There are many applications in which we might wish to navigate our way through a graph of nodes and edges - route finding for satnav systems , controlling character movement in video games, routing traffic on the Internet, crawling the web for a search engine, or finding information in a vector database, for example.",
+          "content": "Graph Search Algorithms There are many applications in which we might wish to navigate our way through a graph of nodes and edges - route finding for satnav systems , controlling character movement in video games, routing traffic on the Internet, crawling the web for a search engine, or finding information in a vector database, for example.",
+          "url": "https://petebleackley.github.io/Key-Algorithms/graph-search-algorithms.html",
+          "source": "petebleackley.github.io",
+          "query": "graph search systems data guide",
+          "rank": 7,
+          "trust_score": 0.7779985666275024,
+          "claim_falsehood_score": 0.501214861869812,
+          "semantic_risk": 0.22200143337249756,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "petebleackley.github.io",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://www.geeksforgeeks.org/dsa/graph-data-structure-and-algorithms/",
+          "title": "Graph Algorithms - GeeksforGeeks",
+          "snippet": "Graph is a non-linear data structure like tree data structure. A Graph is composed of a set of vertices (V) and a set of edges (E). The vertices are connected with each other through edges. The limitation of tree is, it can only represent hierarchical data .",
+          "content": "Graph is a non-linear data structure like tree data structure. A Graph is composed of a set of vertices (V) and a set of edges (E). The vertices are connected with each other through edges. The limitation of tree is, it can only represent hierarchical data .",
+          "url": "https://www.geeksforgeeks.org/dsa/graph-data-structure-and-algorithms/",
+          "source": "geeksforgeeks.org",
+          "query": "graph search systems data guide",
+          "rank": 8,
+          "trust_score": 0.9199429154396057,
+          "claim_falsehood_score": 0.518278956413269,
+          "semantic_risk": 0.08005708456039429,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "geeksforgeeks.org",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://arxiv.org/html/2411.09999v1",
+          "title": "Understanding Graph Databases: A Comprehensive Tutorial and Survey",
+          "snippet": "Graph databases, as discussed in the tutorial, offer advantages over traditional relational databases by enabling efficient management of complex, interconnected data . Overall, this paper discusses prominent graph database systems like Neo4j, Amazon Neptune, and ArangoDB, each with unique features for handling large datasets. There are practical instructions on implementing graph operations ...",
+          "content": "Graph databases, as discussed in the tutorial, offer advantages over traditional relational databases by enabling efficient management of complex, interconnected data . Overall, this paper discusses prominent graph database systems like Neo4j, Amazon Neptune, and ArangoDB, each with unique features for handling large datasets. There are practical instructions on implementing graph operations ...",
+          "url": "https://arxiv.org/html/2411.09999v1",
+          "source": "arxiv.org",
+          "query": "graph search systems data guide",
+          "rank": 9,
+          "trust_score": 0.9728878736495972,
+          "claim_falsehood_score": 0.5026090741157532,
+          "semantic_risk": 0.027112126350402832,
+          "embedding_dim": 384,
+          "cluster_id": 0,
+          "metadata": {},
+          "source_profile": {
+            "host": "arxiv.org",
+            "domain_score": 0.9,
+            "source_type": "research",
+            "matched_rule": "arxiv.org",
+            "blocked": false
+          }
+        },
+        {
+          "document_id": "https://go.neo4j.com/rs/710-RRC-335/images/Comprehensive-Guide-to-Graph-Algorithms-in-Neo4j-ebook-EN-US.pdf",
+          "title": "PDF A Comprehensive Guide to Graph Algorithms in Neo4j",
+          "snippet": "Graph analytics lift out global structures and reveal patterns in your data - without you requiring any prior knowledge of the system . For example, community detection and other algorithms are used to organize groups, suggest hierarchies, and predict missing or vulnerable relationships.",
+          "content": "Graph analytics lift out global structures and reveal patterns in your data - without you requiring any prior knowledge of the system . For example, community detection and other algorithms are used to organize groups, suggest hierarchies, and predict missing or vulnerable relationships.",
+          "url": "https://go.neo4j.com/rs/710-RRC-335/images/Comprehensive-Guide-to-Graph-Algorithms-in-Neo4j-ebook-EN-US.pdf",
+          "source": "go.neo4j.com",
+          "query": "graph search systems data guide",
+          "rank": 10,
+          "trust_score": 0.9071332812309265,
+          "claim_falsehood_score": 0.5088852643966675,
+          "semantic_risk": 0.09286671876907349,
+          "embedding_dim": 384,
+          "cluster_id": null,
+          "metadata": {},
+          "source_profile": {
+            "host": "go.neo4j.com",
+            "domain_score": 0.55,
+            "source_type": "web",
+            "matched_rule": null,
+            "blocked": false
+          }
+        }
+      ]
+    }
+  }
+}

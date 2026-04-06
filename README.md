@@ -67,3 +67,51 @@ Use the trained head at runtime like this:
 ```bash
 python -m jakal_search "graph search systems" --device directml --trust-model outputs/models/trust_head_sentence-transformers__all-MiniLM-L6-v2.pt
 ```
+
+## Production Models
+
+The current Windows deployment uses these trained heads:
+
+- `outputs/models/trust_head_sentence-transformers__all-MiniLM-L6-v2.pt`
+- `outputs/models/claim_falsehood_head_sentence-transformers__all-MiniLM-L6-v2.pt`
+- `outputs/models/branch_head.pt`
+- `outputs/models/topic_reranker_head.pt`
+
+Run with all production heads enabled:
+
+```bash
+python -m jakal_search "graph search systems" \
+  --device directml \
+  --trust-model outputs/models/trust_head_sentence-transformers__all-MiniLM-L6-v2.pt \
+  --claim-model outputs/models/claim_falsehood_head_sentence-transformers__all-MiniLM-L6-v2.pt \
+  --branch-model outputs/models/branch_head.pt \
+  --topic-reranker-model outputs/models/topic_reranker_head.pt
+```
+
+## Deployment
+
+Windows deployment scripts live in `deploy/`.
+
+Install:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File deploy\install_windows.ps1
+```
+
+Run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File deploy\run_search.ps1 -Query "graph search systems"
+```
+
+Smoke check:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File deploy\verify_bundle.ps1
+```
+
+Export a portable bundle with code and model files:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File deploy\export_bundle.ps1
+```
