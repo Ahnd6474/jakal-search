@@ -4,6 +4,7 @@ import argparse
 import csv
 import json
 import random
+import re
 import tarfile
 import time
 import zipfile
@@ -34,6 +35,16 @@ DOC_SOURCE_INDEXES = (
     ("pandas_docs_positive", "https://pandas.pydata.org/docs/"),
     ("requests_docs_positive", "https://requests.readthedocs.io/en/latest/"),
 )
+NEWS_RSS_FEEDS = (
+    ("bbc_world_news_positive", "https://feeds.bbci.co.uk/news/world/rss.xml"),
+    ("bbc_technology_news_positive", "https://feeds.bbci.co.uk/news/technology/rss.xml"),
+    ("npr_news_positive", "https://www.npr.org/rss/rss.php?id=1001"),
+)
+SNOPES_RATING_URLS = (
+    "https://www.snopes.com/fact-check/rating/false/",
+    "https://www.snopes.com/fact-check/rating/mostly-false/",
+)
+POLITIFACT_RULINGS = ("false", "mostly-false", "pants-fire")
 SMS_SPAM_URL = "https://archive.ics.uci.edu/ml/machine-learning-databases/00228/smsspamcollection.zip"
 YOUTUBE_SPAM_URL = "https://archive.ics.uci.edu/ml/machine-learning-databases/00380/YouTube-Spam-Collection-v1.zip"
 SPAMASSASSIN_INDEX_URL = "https://spamassassin.apache.org/old/publiccorpus/"
@@ -73,6 +84,8 @@ def collect_dataset(
     arxiv_per_category: int = 300,
     python_docs_pages: int = 200,
     spamassassin_limit: int = 1200,
+    news_items_per_feed: int = 80,
+    factcheck_pages_per_ruling: int = 2,
     random_seed: int = 0,
 ) -> dict[str, int]:
     client = httpx.Client(
@@ -85,6 +98,7 @@ def collect_dataset(
         if arxiv_per_category > 0:
             positives.extend(collect_arxiv_examples(client, per_category=arxiv_per_category))
         positives.extend(collect_documentation_examples(client, max_pages=python_docs_pages))
+        positives.extend(collect_news_positive_examples(client, items_per_feed=news_items_per_feed))
 
         ham_positives, sms_negatives = collect_sms_examples(client)
         youtube_positives, youtube_negatives = collect_youtube_examples(client)
@@ -98,6 +112,7 @@ def collect_dataset(
         negatives.extend(sms_negatives)
         negatives.extend(youtube_negatives)
         negatives.extend(spamassassin_negatives)
+        negatives.extend(collect_news_negative_examples(client, pages_per_ruling=factcheck_pages_per_ruling))
 
         hard_positives, hard_negatives = generate_hard_synthetic_examples()
         positives.extend(hard_positives)
@@ -117,6 +132,110 @@ def collect_dataset(
         "negative": sum(example.label == 0 for example in examples),
     }
     return label_counts
+
+
+def collect_news_positive_examples(client: httpx.Client, *, items_per_feed: int) -> list[TrustDatasetExample]:
+    examples: list[TrustDatasetExample] = []
+    for source_name, feed_url in NEWS_RSS_FEEDS:
+        response = client.get(feed_url)
+        response.raise_for_status()
+        root = ET.fromstring(response.text)
+        for index, item in enumerate(root.findall("./channel/item")[:items_per_feed]):
+            title = item.findtext("title", default="")
+            description = item.findtext("description", default="")
+            link = item.findtext("link", default=feed_url)
+            text = normalize_text(title, BeautifulSoup(description, "html.parser").get_text(" ", strip=True))
+            if not text:
+                continue
+            examples.append(
+                TrustDatasetExample(
+                    text=text,
+                    label=1,
+                    source=source_name,
+                    source_url=link,
+                    item_id=f"{source_name}:{index}",
+                )
+            )
+    return examples
+
+
+def collect_news_negative_examples(client: httpx.Client, *, pages_per_ruling: int) -> list[TrustDatasetExample]:
+    examples: list[TrustDatasetExample] = []
+    examples.extend(collect_snopes_examples(client, limit_per_rating=max(20, pages_per_ruling * 20)))
+    examples.extend(collect_politifact_examples(client, pages_per_ruling=pages_per_ruling))
+    return examples
+
+
+def collect_snopes_examples(client: httpx.Client, *, limit_per_rating: int) -> list[TrustDatasetExample]:
+    examples: list[TrustDatasetExample] = []
+    for rating_url in SNOPES_RATING_URLS:
+        page = client.get(rating_url)
+        page.raise_for_status()
+        links = sorted(set(re.findall(r'href=\"(https://www\\.snopes\\.com/fact-check/[^\"]+/)\"', page.text)))
+        article_links = [link for link in links if "/rating/" not in link][:limit_per_rating]
+        for link in article_links:
+            article = client.get(link)
+            if article.status_code != 200:
+                continue
+            soup = BeautifulSoup(article.text, "html.parser")
+            title = soup.select_one("h1")
+            paragraphs = [
+                node.get_text(" ", strip=True)
+                for node in soup.select("article p")
+                if node.get_text(" ", strip=True) and node.get_text(" ", strip=True).lower() != "about this rating"
+            ]
+            text = normalize_text(
+                title.get_text(" ", strip=True) if title else "",
+                " ".join(paragraphs[:2]),
+            )
+            if not text:
+                continue
+            examples.append(
+                TrustDatasetExample(
+                    text=text,
+                    label=0,
+                    source="snopes_false_negative",
+                    source_url=link,
+                    item_id=link,
+                )
+            )
+    return examples
+
+
+def collect_politifact_examples(client: httpx.Client, *, pages_per_ruling: int) -> list[TrustDatasetExample]:
+    examples: list[TrustDatasetExample] = []
+    for ruling in POLITIFACT_RULINGS:
+        for page_number in range(1, pages_per_ruling + 1):
+            list_url = f"https://www.politifact.com/factchecks/list/?page={page_number}&ruling={ruling}"
+            listing = client.get(list_url)
+            listing.raise_for_status()
+            relative_links = sorted(set(re.findall(r"/factchecks/\d{4}/[a-z]{3}/\d{2}/[^\"']+/", listing.text)))
+            article_links = [urljoin("https://www.politifact.com", link) for link in relative_links]
+            for link in article_links:
+                article = client.get(link)
+                if article.status_code != 200:
+                    continue
+                soup = BeautifulSoup(article.text, "html.parser")
+                title = soup.select_one("h1")
+                description = soup.select_one("meta[name=description]")
+                paragraphs = [node.get_text(" ", strip=True) for node in soup.select(".m-textblock p") if node.get_text(" ", strip=True)]
+                text = normalize_text(
+                    title.get_text(" ", strip=True) if title else "",
+                    description.get("content", "") if description else "",
+                    " ".join(paragraphs[:2]),
+                )
+                if not text:
+                    continue
+                examples.append(
+                    TrustDatasetExample(
+                        text=text,
+                        label=0,
+                        source=f"politifact_{ruling}_negative",
+                        source_url=link,
+                        item_id=link,
+                    )
+                )
+    return examples
 
 
 def collect_arxiv_examples(client: httpx.Client, *, per_category: int) -> list[TrustDatasetExample]:
@@ -649,6 +768,8 @@ def main() -> int:
     collect_parser.add_argument("--arxiv-per-category", type=int, default=300)
     collect_parser.add_argument("--python-docs-pages", type=int, default=200)
     collect_parser.add_argument("--spamassassin-limit", type=int, default=1200)
+    collect_parser.add_argument("--news-items-per-feed", type=int, default=80)
+    collect_parser.add_argument("--factcheck-pages-per-ruling", type=int, default=2)
     collect_parser.add_argument("--seed", type=int, default=0)
 
     train_parser = subparsers.add_parser("train", help="Train a supervised trust head from a collected dataset.")
@@ -686,6 +807,8 @@ def main() -> int:
     run_parser.add_argument("--arxiv-per-category", type=int, default=300)
     run_parser.add_argument("--python-docs-pages", type=int, default=200)
     run_parser.add_argument("--spamassassin-limit", type=int, default=1200)
+    run_parser.add_argument("--news-items-per-feed", type=int, default=80)
+    run_parser.add_argument("--factcheck-pages-per-ruling", type=int, default=2)
     run_parser.add_argument("--model-name", default="sentence-transformers/all-MiniLM-L6-v2")
     run_parser.add_argument("--embedding-device", default="directml")
     run_parser.add_argument("--hidden-dim", type=int, default=128)
@@ -704,6 +827,8 @@ def main() -> int:
             arxiv_per_category=args.arxiv_per_category,
             python_docs_pages=args.python_docs_pages,
             spamassassin_limit=args.spamassassin_limit,
+            news_items_per_feed=args.news_items_per_feed,
+            factcheck_pages_per_ruling=args.factcheck_pages_per_ruling,
             random_seed=args.seed,
         )
         print(json.dumps({"dataset_path": str(args.dataset_out), "counts": counts}, ensure_ascii=False, indent=2))
@@ -731,6 +856,8 @@ def main() -> int:
         arxiv_per_category=args.arxiv_per_category,
         python_docs_pages=args.python_docs_pages,
         spamassassin_limit=args.spamassassin_limit,
+        news_items_per_feed=args.news_items_per_feed,
+        factcheck_pages_per_ruling=args.factcheck_pages_per_ruling,
         random_seed=args.seed,
     )
     model_path, metrics = train_trust_head(
