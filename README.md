@@ -9,14 +9,36 @@ Tree-based exploratory web search engine with:
 - pruning and stopping rules
 - vector-path tracking for branch quality
 
-## Quick Start
+## Install
+
+Install the published package:
+
+```bash
+pip install jakal-search
+jakal-search "graph search systems"
+```
+
+Install optional model support:
+
+```bash
+pip install "jakal-search[models]"
+```
+
+Install optional Windows DirectML support:
+
+```bash
+pip install "jakal-search[models,directml]"
+jakal-search "graph search systems" --device directml
+```
+
+Install from source for local development:
 
 ```bash
 pip install -e .[dev]
 python -m jakal_search "graph search systems"
 ```
 
-For transformer embeddings:
+For local source installs with transformer embeddings:
 
 ```bash
 pip install -e .[dev,models]
@@ -36,6 +58,18 @@ python -m jakal_search "graph search systems" --device directml
 - When `sentence-transformers` is active, trust scoring uses an embedding MLP head trained from trusted/suspicious prototype texts. Topic generation still uses the TF-IDF heuristic path.
 - `hdbscan` is optional. If it is not installed, the engine falls back to `DBSCAN`.
 - The bundled CLI uses DuckDuckGo's HTML endpoint as a simple provider.
+
+## CLI Entry Points
+
+After installation, these commands are available:
+
+- `jakal-search`
+- `jakal-search-tune`
+- `jakal-search-gui`
+- `jakal-search-trust`
+- `jakal-search-branch`
+- `jakal-search-reranker`
+- `jakal-search-falsehood`
 
 ## Output Formats
 
@@ -133,4 +167,30 @@ Export a portable bundle with code and model files:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File deploy\export_bundle.ps1
+```
+
+## Release Workflow
+
+Build distribution artifacts:
+
+```bash
+python -m build
+```
+
+Validate package metadata and README rendering:
+
+```bash
+twine check dist/*
+```
+
+Upload to TestPyPI first:
+
+```bash
+twine upload --repository testpypi dist/*
+```
+
+Upload to PyPI:
+
+```bash
+twine upload dist/*
 ```

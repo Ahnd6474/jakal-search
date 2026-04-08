@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from . import __version__
 from .config import EngineConfig
 from .engine import build_default_engine
 from .output import render_output
@@ -16,6 +17,7 @@ def main() -> int:
     if hasattr(sys.stderr, "reconfigure"):
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(description="Tree-based exploratory search engine.")
+    parser.add_argument("--version", action="version", version=f"jakal-search {__version__}")
     parser.add_argument("query", help="Root search query")
     parser.add_argument("--max-depth", type=int, default=3)
     parser.add_argument("--max-nodes", type=int, default=24)
