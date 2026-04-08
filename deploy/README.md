@@ -4,8 +4,8 @@ This directory contains the deployment entrypoints for the current Windows + Int
 
 ## Included runtime models
 
-- `trust_head_sentence-transformers__all-MiniLM-L6-v2.pt`
-- `claim_falsehood_head_sentence-transformers__all-MiniLM-L6-v2.pt`
+- `trust_head_sentence-transformers__paraphrase-MiniLM-L3-v2.pt`
+- `claim_falsehood_head_sentence-transformers__paraphrase-MiniLM-L3-v2.pt`
 - `branch_head.pt`
 - `topic_reranker_head.pt`
 

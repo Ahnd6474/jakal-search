@@ -70,29 +70,6 @@ def build_seed_judgments() -> list[JudgedQuery]:
     return judged_queries
 
 
-def build_feedback_judgments(storage_dir: Path) -> list[JudgedQuery]:
-    runs_dir = storage_dir / "runs"
-    if not runs_dir.exists():
-        return []
-    judged_queries: list[JudgedQuery] = []
-    for run_path in sorted(runs_dir.glob("*.json")):
-        payload = json.loads(run_path.read_text(encoding="utf-8"))
-        feedback = payload.get("feedback")
-        if not feedback:
-            continue
-        winning_slot = str(feedback.get("choice") or "").upper()
-        judgments: list[JudgedDocument] = []
-        for option in payload.get("options", []):
-            relevance = 1
-            if option.get("slot") == winning_slot:
-                relevance = 2
-            for node in option.get("tree", {}).get("nodes", {}).values():
-                for doc in node.get("docs", []):
-                    judgments.append(JudgedDocument(url=str(doc["url"]), relevance=relevance))
-        judged_queries.append(JudgedQuery(query=str(payload.get("query") or ""), judgments=judgments))
-    return judged_queries
-
-
 def evaluate_engine(
     engine_factory: Callable[[EngineConfig], SearchTreeEngine],
     config: EngineConfig,
@@ -158,13 +135,10 @@ def _mrr(gains: list[int]) -> float:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Evaluate jakal-search against judged queries.")
     parser.add_argument("--judgments", type=Path, default=None)
-    parser.add_argument("--feedback-dir", type=Path, default=Path("outputs") / "feedback")
     parser.add_argument("--json-out", type=Path, default=None)
     args = parser.parse_args()
 
     judged_queries = build_seed_judgments()
-    if args.feedback_dir.exists():
-        judged_queries.extend(build_feedback_judgments(args.feedback_dir))
     if args.judgments is not None and args.judgments.exists():
         judged_queries.extend(load_judged_queries(args.judgments))
 

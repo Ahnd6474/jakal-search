@@ -17,7 +17,6 @@ Recursive web search for evidence collection, topic expansion, and machine-reada
 - [CLI reference](#cli-reference)
 - [Examples](#examples)
 - [Training and tuning utilities](#training-and-tuning-utilities)
-- [Desktop GUI](#desktop-gui)
 - [Deployment](#deployment)
 - [License](#license)
 
@@ -282,20 +281,6 @@ python -m jakal_search "graph search systems" \
   --branch-model outputs/models/branch_head.pt \
   --topic-reranker-model outputs/models/topic_reranker_head.pt
 ```
-
-## Desktop GUI
-
-The desktop app lives in `desktop/` and uses Tauri plus React. It is set up as a blind pairwise comparison UI over search results.
-
-Start it like this:
-
-```bash
-cd desktop
-npm install
-npm run tauri dev
-```
-
-The GUI calls `python -m jakal_search.gui_api` and stores feedback in `outputs/feedback/`.
 
 ## Deployment
 

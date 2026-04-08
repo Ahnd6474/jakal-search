@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .config import EngineConfig
 from .engine import build_default_engine
-from .evaluation import build_feedback_judgments, build_seed_judgments, evaluate_engine
+from .evaluation import build_seed_judgments, evaluate_engine
 from .tuning import clone_config
 
 
@@ -54,10 +54,8 @@ def build_ablation_configs(base_config: EngineConfig) -> list[tuple[str, EngineC
     return variants
 
 
-def run_ablation(base_config: EngineConfig, *, feedback_dir: Path | None = None) -> list[AblationResult]:
+def run_ablation(base_config: EngineConfig) -> list[AblationResult]:
     judged_queries = build_seed_judgments()
-    if feedback_dir is not None and feedback_dir.exists():
-        judged_queries.extend(build_feedback_judgments(feedback_dir))
 
     results: list[AblationResult] = []
     for name, config in build_ablation_configs(base_config):
@@ -68,11 +66,10 @@ def run_ablation(base_config: EngineConfig, *, feedback_dir: Path | None = None)
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run offline feature ablations for jakal-search.")
-    parser.add_argument("--feedback-dir", type=Path, default=Path("outputs") / "feedback")
     parser.add_argument("--json-out", type=Path, default=Path("outputs") / "evaluation" / "ablations.json")
     args = parser.parse_args()
 
-    results = run_ablation(EngineConfig(), feedback_dir=args.feedback_dir)
+    results = run_ablation(EngineConfig())
     payload = {"ablations": [result.to_dict() for result in results]}
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
     args.json_out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
