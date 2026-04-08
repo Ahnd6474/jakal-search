@@ -24,6 +24,7 @@ advanced-clustering = ["hdbscan>=0.8.33"]
 [project.scripts]
 jakal-search = "jakal_search.cli:main"
 jakal-search-tune = "jakal_search.tuning:main"
+jakal-search-gui = "jakal_search.gui_api:main"
 jakal-search-trust = "jakal_search.trust_training:main"
 jakal-search-branch = "jakal_search.branch_training:main"
 jakal-search-reranker = "jakal_search.reranker_training:main"

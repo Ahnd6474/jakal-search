@@ -13,3 +13,7 @@ dist/
 .lineages/
 jakal-flow-logs/
 .idea
+node_modules/
+desktop/dist/
+desktop/src-tauri/target/
+outputs/feedback/

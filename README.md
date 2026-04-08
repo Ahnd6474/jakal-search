@@ -46,6 +46,25 @@ python -m jakal_search "graph search systems" --format tree
 python -m jakal_search "graph search systems" --format json
 ```
 
+## Desktop GUI
+
+The desktop app uses `Tauri + React` and presents results as a blind pairwise comparison.
+
+- The user only enters a query and picks whether result `A` or `B` is better.
+- Search settings remain hidden.
+- A pairwise policy learner updates internal search profiles from user preference feedback.
+
+Start the desktop app:
+
+```bash
+cd desktop
+npm install
+npm run tauri dev
+```
+
+The GUI calls `python -m jakal_search.gui_api` under the hood and stores feedback state in `outputs/feedback/`.
+If the desktop app cannot discover Python or the repo root automatically, set `JAKAL_SEARCH_PYTHON` and `JAKAL_SEARCH_ROOT`.
+
 ## Local Tuning
 
 ```bash
