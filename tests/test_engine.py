@@ -32,6 +32,19 @@ class FakeProvider:
             docs = []
         return docs[:max_results]
 
+    def enrich_documents(self, docs: list[SearchDocument], max_docs: int) -> list[SearchDocument]:
+        enriched: list[SearchDocument] = []
+        for index, doc in enumerate(docs):
+            clone = doc.clone()
+            if index < max_docs:
+                clone.content = (
+                    f"{clone.title}. "
+                    f"{clone.title} detailed evidence and supporting explanation for {clone.query}. "
+                    f"Additional context about {clone.source} and reproducible validation steps."
+                )
+            enriched.append(clone)
+        return enriched
+
 
 class KeywordEmbedder:
     def embed(self, texts: list[str]) -> np.ndarray:
@@ -40,18 +53,18 @@ class KeywordEmbedder:
             lowered = text.lower()
             vector = np.zeros(18, dtype=np.float32)
             if "search" in lowered:
-                vector[0] += 1.0
+                vector[0] += 0.6
             if "policy" in lowered or "governance" in lowered:
-                vector[1] += 1.0
+                vector[1] += 2.0
             if "tracking" in lowered or "vector" in lowered or "drift" in lowered:
-                vector[2] += 1.0
+                vector[2] += 2.0
             if "alignment" in lowered:
                 vector[3] += 1.0
             if "miracle" in lowered or "conspiracy" in lowered or "secret" in lowered:
-                vector[4] += 1.0
+                vector[4] += 1.5
             for token in lowered.split():
                 bucket = 5 + (sum(ord(char) for char in token) % 13)
-                vector[bucket] += 0.15
+                vector[bucket] += 0.05
             if not vector.any():
                 vector[17] = 1.0
             rows.append(vector)
@@ -133,7 +146,7 @@ def test_engine_builds_subtopics_and_filters_low_trust_noise() -> None:
     config.limits.min_cluster_size = 3
     config.limits.max_children_per_node = 2
     config.limits.results_per_query = 8
-    config.similarity.dedupe_threshold = 0.995
+    config.similarity.dedupe_threshold = 0.999
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
@@ -149,10 +162,30 @@ def test_engine_builds_subtopics_and_filters_low_trust_noise() -> None:
     assert all("miracle" not in doc.title for doc in root.docs)
     assert all(doc.embedding is not None for doc in root.docs)
     assert all(doc.content for doc in root.docs)
+    assert all(doc.passages for doc in root.docs)
+    assert all(doc.retrieval_score >= 0.0 for doc in root.docs)
     assert all(doc.document_id for doc in root.docs)
     assert all(doc.source_profile is not None for doc in root.docs)
+    assert root.theme_tokens
+    assert all(doc.metadata.get("theme_memberships") for doc in root.docs)
+    assert all(token.outgoing_edges for token in root.theme_tokens)
+    assert all(token.asset_condition for token in root.theme_tokens)
+    assert all(token.query for token in root.theme_tokens)
+    assert all(token.candidate_scores for token in root.theme_tokens)
+    assert all(
+        edge["target_token_id"] != token.token_id
+        for token in root.theme_tokens
+        for edge in token.outgoing_edges
+    )
+    assert all(
+        sum(abs(float(edge["weight"])) for edge in token.outgoing_edges) <= 1.00001
+        for token in root.theme_tokens
+    )
     assert any(doc.source_profile.source_type == "research" for doc in root.docs if doc.source_profile)
     assert all("decision_reason" in tree.nodes[child_id].metrics for child_id in root.children)
+    assert all("evidence_coverage" in tree.nodes[child_id].metrics for child_id in root.children)
+    assert all(tree.nodes[child_id].theme_tokens for child_id in root.children)
+    assert all(tree.nodes[child_id].topic is not None for child_id in root.children)
     assert tree.expansions[root.node_id].raw_document_ids
     assert tree.expansions[root.node_id].trusted_document_ids
     assert tree.expansions[root.node_id].unique_document_ids
@@ -166,7 +199,7 @@ def test_max_depth_stops_expansion() -> None:
     config.limits.min_results = 3
     config.limits.min_cluster_size = 3
     config.limits.results_per_query = 8
-    config.similarity.dedupe_threshold = 0.995
+    config.similarity.dedupe_threshold = 0.999
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
@@ -184,7 +217,7 @@ def test_engine_reuse_resets_run_state() -> None:
     config.limits.min_cluster_size = 3
     config.limits.max_children_per_node = 2
     config.limits.results_per_query = 8
-    config.similarity.dedupe_threshold = 0.995
+    config.similarity.dedupe_threshold = 0.999
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
@@ -217,7 +250,7 @@ def test_document_clone_prevents_provider_state_leakage() -> None:
     config.limits.min_results = 3
     config.limits.min_cluster_size = 3
     config.limits.results_per_query = 8
-    config.similarity.dedupe_threshold = 0.995
+    config.similarity.dedupe_threshold = 0.999
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
@@ -235,7 +268,7 @@ def test_search_request_overrides_limits_without_mutating_engine_defaults() -> N
     config.limits.results_per_query = 8
     config.limits.min_results = 3
     config.limits.min_cluster_size = 3
-    config.similarity.dedupe_threshold = 0.995
+    config.similarity.dedupe_threshold = 0.999
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
@@ -264,7 +297,7 @@ def test_expansion_context_tracks_stop_reason_for_terminal_nodes() -> None:
     config.limits.min_results = 3
     config.limits.min_cluster_size = 3
     config.limits.results_per_query = 8
-    config.similarity.dedupe_threshold = 0.995
+    config.similarity.dedupe_threshold = 0.999
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
@@ -276,3 +309,83 @@ def test_expansion_context_tracks_stop_reason_for_terminal_nodes() -> None:
             context = tree.expansions[child_id]
             assert context.stop_reason == "max_depth"
             assert any(event.event_type == "expand_stopped" for event in context.events)
+
+
+def test_engine_applies_strict_as_of_cutoff_before_ranking() -> None:
+    class TimedProvider:
+        def search(self, query: str, max_results: int) -> list[SearchDocument]:
+            docs = [
+                SearchDocument(
+                    title="alpha earnings preview",
+                    snippet="alpha earnings preview",
+                    url="https://news.example.com/alpha-preview",
+                    source="news.example.com",
+                    query=query,
+                    rank=1,
+                    published_at="2026-04-08T08:30:00Z",
+                    published_at_precision="datetime",
+                ),
+                SearchDocument(
+                    title="alpha intraday rumor",
+                    snippet="alpha intraday rumor",
+                    url="https://news.example.com/alpha-rumor",
+                    source="news.example.com",
+                    query=query,
+                    rank=2,
+                    published_at="2026-04-08T12:30:00Z",
+                    published_at_precision="datetime",
+                ),
+                SearchDocument(
+                    title="alpha dated article",
+                    snippet="alpha dated article",
+                    url="https://news.example.com/alpha-dated",
+                    source="news.example.com",
+                    query=query,
+                    rank=3,
+                    published_at="2026-04-08",
+                    published_at_precision="date",
+                ),
+                SearchDocument(
+                    title="alpha older filing",
+                    snippet="alpha older filing",
+                    url="https://sec.gov/alpha-filing",
+                    source="sec.gov",
+                    query=query,
+                    rank=4,
+                    published_at="2026-04-07T18:00:00Z",
+                    published_at_precision="datetime",
+                ),
+            ]
+            return docs[:max_results]
+
+        def enrich_documents(self, docs: list[SearchDocument], max_docs: int) -> list[SearchDocument]:
+            return [doc.clone() for doc in docs]
+
+    config = EngineConfig()
+    config.limits.max_depth = 1
+    config.limits.min_results = 2
+    config.limits.min_cluster_size = 2
+    config.limits.results_per_query = 4
+    config.similarity.dedupe_threshold = 0.999
+    config.similarity.scope_threshold = 0.1
+    config.retrieval.enable_page_fetch = False
+
+    engine = SearchTreeEngine(provider=TimedProvider(), embedder=KeywordEmbedder(), config=config)
+    tree = engine.run(
+        SearchRequest(
+            query="ALPHA stock earnings",
+            max_depth=1,
+            results_per_query=4,
+            metadata={"as_of": "2026-04-08T09:00:00Z"},
+        )
+    )
+
+    root = tree.nodes[tree.root_id]
+    kept_urls = {doc.url for doc in root.docs}
+
+    assert "https://news.example.com/alpha-preview" in kept_urls
+    assert "https://sec.gov/alpha-filing" in kept_urls
+    assert "https://news.example.com/alpha-rumor" not in kept_urls
+    assert "https://news.example.com/alpha-dated" not in kept_urls
+    assert all(doc.metadata.get("as_of") == "2026-04-08T09:00:00Z" for doc in root.docs)
+    assert any(event.event_type == "as_of_cutoff" for event in tree.logs)

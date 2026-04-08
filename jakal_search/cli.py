@@ -24,6 +24,38 @@ def main() -> int:
     parser.add_argument("--frontier-width", type=int, default=6)
     parser.add_argument("--results-per-query", type=int, default=12)
     parser.add_argument(
+        "--no-page-fetch",
+        action="store_true",
+        help="Disable landing-page fetch and passage extraction.",
+    )
+    parser.add_argument(
+        "--fetch-top-k",
+        type=int,
+        default=6,
+        help="How many top provider results to enrich with page content.",
+    )
+    parser.add_argument(
+        "--provider-pack",
+        choices=["auto", "general", "technical", "research", "news", "market_news"],
+        default="auto",
+        help="Free provider pack selection strategy.",
+    )
+    parser.add_argument(
+        "--stock-news",
+        action="store_true",
+        help="Shortcut for market-news collection settings.",
+    )
+    parser.add_argument(
+        "--as-of",
+        default=None,
+        help="Strict cutoff timestamp. Only documents published at or before this timestamp are kept.",
+    )
+    parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Disable landing-page cache.",
+    )
+    parser.add_argument(
         "--device",
         default="auto",
         help="Embedding device: auto, cpu, cuda, mps, xpu, or directml",
@@ -54,7 +86,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--format",
-        choices=["report", "urls", "tree", "json"],
+        choices=["report", "urls", "tree", "json", "answer", "records"],
         default="report",
         help="Output format for stdout",
     )
@@ -66,6 +98,13 @@ def main() -> int:
     config.limits.max_total_nodes = args.max_nodes
     config.limits.frontier_width = args.frontier_width
     config.limits.results_per_query = args.results_per_query
+    config.retrieval.enable_page_fetch = not args.no_page_fetch
+    config.retrieval.fetch_top_k = args.fetch_top_k
+    config.retrieval.provider_pack = "market_news" if args.stock_news else args.provider_pack
+    config.retrieval.enable_cache = not args.no_cache
+    if args.stock_news:
+        config.retrieval.freshness_weight = max(config.retrieval.freshness_weight, 0.2)
+        config.scoring.freshness_weight = max(config.scoring.freshness_weight, 0.8)
     config.transformer_device = args.device
     config.trust_model_path = None if args.trust_model is None else str(args.trust_model)
     config.branch_model_path = None if args.branch_model is None else str(args.branch_model)
@@ -79,6 +118,7 @@ def main() -> int:
         max_total_nodes=args.max_nodes,
         frontier_width=args.frontier_width,
         results_per_query=args.results_per_query,
+        metadata={"as_of": args.as_of} if args.as_of else {},
     )
     tree = engine.run(request)
     print(render_output(tree, args.format))

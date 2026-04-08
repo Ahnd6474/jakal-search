@@ -196,7 +196,7 @@ def train_reranker(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Train the topic/query reranker on local benchmark candidates.")
     parser.add_argument("--embedder", choices=["synthetic", "sentence-transformer"], default="synthetic")
-    parser.add_argument("--model-name", default="sentence-transformers/all-MiniLM-L6-v2")
+    parser.add_argument("--model-name", default="sentence-transformers/paraphrase-MiniLM-L3-v2")
     parser.add_argument("--device", default="auto")
     parser.add_argument("--output-dir", type=Path, default=Path("outputs") / "models")
     parser.add_argument("--dataset-out", type=Path, default=Path("outputs") / "datasets" / "topic_reranker_dataset.jsonl")

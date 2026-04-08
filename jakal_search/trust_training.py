@@ -753,7 +753,7 @@ def main() -> int:
         type=Path,
         default=Path("outputs") / "models",
     )
-    train_parser.add_argument("--model-name", default="sentence-transformers/all-MiniLM-L6-v2")
+    train_parser.add_argument("--model-name", default="sentence-transformers/paraphrase-MiniLM-L3-v2")
     train_parser.add_argument("--embedding-device", default="directml")
     train_parser.add_argument("--hidden-dim", type=int, default=128)
     train_parser.add_argument("--epochs", type=int, default=8)
@@ -780,7 +780,7 @@ def main() -> int:
     run_parser.add_argument("--news-items-per-feed", type=int, default=80)
     run_parser.add_argument("--max-per-source", type=int, default=280)
     run_parser.add_argument("--no-balance-labels", action="store_true")
-    run_parser.add_argument("--model-name", default="sentence-transformers/all-MiniLM-L6-v2")
+    run_parser.add_argument("--model-name", default="sentence-transformers/paraphrase-MiniLM-L3-v2")
     run_parser.add_argument("--embedding-device", default="directml")
     run_parser.add_argument("--hidden-dim", type=int, default=128)
     run_parser.add_argument("--epochs", type=int, default=8)

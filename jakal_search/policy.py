@@ -14,6 +14,7 @@ from typing import Any, Callable, Literal
 from .config import EngineConfig
 from .engine import SearchTreeEngine, build_default_engine
 from .output import render_output
+from .query_analysis import QueryAnalysis, analyze_query
 from .types import SearchDocument, SearchRequest, SearchTree
 
 PreferenceChoice = Literal["A", "B", "tie"]
@@ -118,6 +119,37 @@ class PolicyState:
         )
 
 
+@dataclass(slots=True)
+class QueryProfile:
+    key: str
+    intent: str
+    domain_pack: str
+    comparisons: int = 0
+    preferred_action_id: str | None = None
+    wins_by_action: dict[str, int] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "key": self.key,
+            "intent": self.intent,
+            "domain_pack": self.domain_pack,
+            "comparisons": self.comparisons,
+            "preferred_action_id": self.preferred_action_id,
+            "wins_by_action": dict(self.wins_by_action),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> QueryProfile:
+        return cls(
+            key=str(payload.get("key") or ""),
+            intent=str(payload.get("intent") or "exploratory"),
+            domain_pack=str(payload.get("domain_pack") or "general"),
+            comparisons=int(payload.get("comparisons", 0)),
+            preferred_action_id=payload.get("preferred_action_id"),
+            wins_by_action={str(key): int(value) for key, value in dict(payload.get("wins_by_action", {})).items()},
+        )
+
+
 DEFAULT_ACTIONS: tuple[HiddenSearchAction, ...] = (
     HiddenSearchAction(
         action_id="balanced",
@@ -219,6 +251,7 @@ class PairwiseSearchService:
         self.runs_dir = self.storage_dir / "runs"
         self.events_path = self.storage_dir / "feedback_events.jsonl"
         self.state_path = self.storage_dir / "policy_state.json"
+        self.profile_path = self.storage_dir / "query_profiles.json"
         self.base_config = copy.deepcopy(base_config or EngineConfig())
         self.engine_factory = engine_factory or build_default_engine
         self.rng = rng or random.Random()

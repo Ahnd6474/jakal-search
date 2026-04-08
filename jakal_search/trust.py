@@ -10,7 +10,7 @@ from torch import nn
 from .config import TrustConfig
 from .embedding import TextEmbedder
 from .types import SearchDocument, SourceProfile
-from .utils import cosine_similarity
+from .utils import age_in_days, cosine_similarity, parse_iso_datetime
 
 SOURCE_TYPE_ORDER = (
     "government",
@@ -101,8 +101,13 @@ def resolve_source_profile(config: TrustConfig, source: str) -> SourceProfile:
     )
 
 
-def build_source_feature_vector(profile: SourceProfile) -> np.ndarray:
-    vector = np.zeros(14, dtype=np.float32)
+def build_source_feature_vector(
+    profile: SourceProfile,
+    doc: SearchDocument | None = None,
+    *,
+    reference_time: str | None = None,
+) -> np.ndarray:
+    vector = np.zeros(22, dtype=np.float32)
     vector[0] = float(profile.domain_score)
     vector[1] = 1.0 if profile.blocked else 0.0
     if profile.matched_rule is not None:
@@ -116,11 +121,31 @@ def build_source_feature_vector(profile: SourceProfile) -> np.ndarray:
     vector[11] = 1.0 if host.endswith(".com") else 0.0
     vector[12] = 1.0 if host.endswith(".gov") or host.endswith(".edu") else 0.0
     vector[13] = min(host.count("."), 4) / 4.0
+    if doc is not None:
+        metadata = doc.metadata
+        vector[14] = min(float(metadata.get("citation_count", 0.0)) / 6.0, 1.0)
+        vector[15] = min(float(metadata.get("outbound_link_count", 0.0)) / 12.0, 1.0)
+        vector[16] = 1.0 if metadata.get("author") else 0.0
+        vector[17] = 1.0 if metadata.get("has_about_link") else 0.0
+        vector[18] = min(float(metadata.get("affiliate_link_count", 0.0)) / 4.0, 1.0)
+        vector[19] = min(float(metadata.get("duplicate_ratio", 0.0)), 1.0)
+        vector[20] = min(float(metadata.get("text_length", 0.0)) / 4000.0, 1.0)
+        age_days = age_in_days(doc.published_at, now=parse_iso_datetime(reference_time))
+        vector[21] = 0.0 if age_days is None else float(np.exp(-age_days / 365.0))
     return vector
 
 
-def build_trust_feature_vector(embedding: np.ndarray, profile: SourceProfile) -> np.ndarray:
-    return np.concatenate([embedding.astype(np.float32), build_source_feature_vector(profile)], axis=0)
+def build_trust_feature_vector(
+    embedding: np.ndarray,
+    profile: SourceProfile,
+    doc: SearchDocument | None = None,
+    *,
+    reference_time: str | None = None,
+) -> np.ndarray:
+    return np.concatenate(
+        [embedding.astype(np.float32), build_source_feature_vector(profile, doc, reference_time=reference_time)],
+        axis=0,
+    )
 
 
 class SourceTrustScorer:
@@ -149,6 +174,8 @@ class SourceTrustScorer:
     def assess_documents(
         self,
         documents: list[SearchDocument],
+        *,
+        reference_time: str | None = None,
     ) -> list[SearchDocument]:
         if not documents:
             return []
@@ -175,16 +202,25 @@ class SourceTrustScorer:
                 continue
 
             if self._use_embedding_mlp and self._embedding_trust_head is not None:
-                trust_score = self._score_with_embedding_mlp(vector, profile)
+                trust_score = self._score_with_embedding_mlp(vector, profile, doc, reference_time=reference_time)
                 semantic_risk = max(0.0, min(1.0, 1.0 - trust_score))
             else:
                 semantic_risk, semantic_score = self._semantic_scores(vector)
+                reputation_score = self._reputation_bonus(doc, reference_time=reference_time)
                 trust_score = max(
                     0.0,
                     min(
                         1.0,
                         (self._config.domain_score_weight * profile.domain_score)
                         + (self._config.semantic_score_weight * semantic_score),
+                        # keep page-level signals bounded and secondary to the host prior
+                    ),
+                )
+                trust_score = max(
+                    0.0,
+                    min(
+                        1.0,
+                        trust_score + reputation_score,
                     ),
                 )
 
@@ -237,16 +273,18 @@ class SourceTrustScorer:
         trusted_hosts = ("docs.python.org", "acm.org", "ieee.org", "npr.org")
         suspicious_hosts = ("blogspot.com", "wordpress.com", "medium.com", "substack.com")
         trusted_rows = [
-            build_trust_feature_vector(
-                embedding,
-                resolve_source_profile(self._config, trusted_hosts[index % len(trusted_hosts)]),
-            )
-            for index, embedding in enumerate(trusted_embeddings)
+                build_trust_feature_vector(
+                    embedding,
+                    resolve_source_profile(self._config, trusted_hosts[index % len(trusted_hosts)]),
+                    None,
+                )
+                for index, embedding in enumerate(trusted_embeddings)
         ]
         suspicious_rows = [
             build_trust_feature_vector(
                 embedding,
                 resolve_source_profile(self._config, suspicious_hosts[index % len(suspicious_hosts)]),
+                None,
             )
             for index, embedding in enumerate(suspicious_embeddings)
         ]
@@ -279,12 +317,21 @@ class SourceTrustScorer:
         model.eval()
         return model
 
-    def _score_with_embedding_mlp(self, vector: np.ndarray, profile: SourceProfile) -> float:
+    def _score_with_embedding_mlp(
+        self,
+        vector: np.ndarray,
+        profile: SourceProfile,
+        doc: SearchDocument,
+        *,
+        reference_time: str | None = None,
+    ) -> float:
         if self._embedding_trust_head is None:
             return 0.5
-        feature_row = build_trust_feature_vector(vector, profile)
+        feature_row = build_trust_feature_vector(vector, profile, doc, reference_time=reference_time)
         with torch.no_grad():
-            logits = self._embedding_trust_head(torch.from_numpy(feature_row).unsqueeze(0))
+            input_dim = self._embedding_trust_head.layers[0].in_features
+            fitted = self._fit_feature_vector(feature_row, input_dim)
+            logits = self._embedding_trust_head(torch.from_numpy(fitted).unsqueeze(0))
             return float(torch.sigmoid(logits).item())
 
     def _maybe_load_trained_head(self) -> None:
@@ -301,3 +348,21 @@ class SourceTrustScorer:
         self._embedding_trust_head = model
         self._embedding_threshold = float(payload.get("threshold", self._config.mlp_threshold))
         self._loaded_model = True
+
+    def _reputation_bonus(self, doc: SearchDocument, *, reference_time: str | None = None) -> float:
+        metadata = doc.metadata
+        citation_bonus = min(float(metadata.get("citation_count", 0.0)) / 6.0, 1.0) * self._config.citation_bonus_weight
+        outbound_bonus = min(float(metadata.get("outbound_link_count", 0.0)) / 12.0, 1.0) * self._config.outbound_reference_bonus_weight
+        author_bonus = (1.0 if metadata.get("author") else 0.0) * self._config.author_bonus_weight
+        recency_signal = age_in_days(doc.published_at, now=parse_iso_datetime(reference_time))
+        recency_bonus = 0.0 if recency_signal is None else float(np.exp(-recency_signal / 365.0)) * self._config.recency_bonus_weight
+        affiliate_penalty = min(float(metadata.get("affiliate_link_count", 0.0)) / 4.0, 1.0) * self._config.affiliate_penalty_weight
+        duplication_penalty = min(float(metadata.get("duplicate_ratio", 0.0)), 1.0) * self._config.duplication_penalty_weight
+        return citation_bonus + outbound_bonus + author_bonus + recency_bonus - affiliate_penalty - duplication_penalty
+
+    def _fit_feature_vector(self, vector: np.ndarray, input_dim: int) -> np.ndarray:
+        if vector.shape[0] == input_dim:
+            return vector
+        if vector.shape[0] > input_dim:
+            return vector[:input_dim]
+        return np.pad(vector, (0, input_dim - vector.shape[0]), mode="constant")

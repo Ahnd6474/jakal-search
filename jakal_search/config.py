@@ -40,6 +40,26 @@ class SimilarityConfig:
 
 
 @dataclass(slots=True)
+class RetrievalConfig:
+    enable_page_fetch: bool = True
+    fetch_top_k: int = 6
+    max_passages_per_doc: int = 3
+    provider_pack: str = "auto"
+    async_concurrency: int = 6
+    per_host_delay_seconds: float = 0.4
+    enable_cache: bool = True
+    cache_ttl_hours: int = 72
+    cache_dir: str = "outputs/cache/pages"
+    lexical_weight: float = 0.35
+    dense_weight: float = 0.4
+    provider_weight: float = 0.15
+    domain_weight: float = 0.1
+    freshness_weight: float = 0.12
+    entity_weight: float = 0.08
+    passage_dedupe_threshold: float = 0.82
+
+
+@dataclass(slots=True)
 class TrustConfig:
     min_domain_trust: float = 0.22
     low_trust_semantic_threshold: float = 0.78
@@ -52,6 +72,12 @@ class TrustConfig:
     mlp_weight_decay: float = 1e-4
     mlp_model_path: str | None = None
     mlp_threshold: float = 0.5
+    citation_bonus_weight: float = 0.08
+    author_bonus_weight: float = 0.05
+    outbound_reference_bonus_weight: float = 0.05
+    recency_bonus_weight: float = 0.04
+    affiliate_penalty_weight: float = 0.09
+    duplication_penalty_weight: float = 0.08
     blocked_domain_suffixes: tuple[str, ...] = ()
     domain_weights: dict[str, float] = field(default_factory=lambda: DEFAULT_DOMAIN_TRUST.copy())
     trusted_prototypes: tuple[str, ...] = (
@@ -79,6 +105,12 @@ class ScoringConfig:
     support_weight: float = 0.8
     vector_weight: float = 1.2
     size_weight: float = 0.7
+    source_diversity_weight: float = 0.8
+    evidence_weight: float = 0.9
+    falsehood_weight: float = 1.1
+    freshness_weight: float = 0.5
+    entity_weight: float = 0.55
+    contradiction_weight: float = 0.75
     bias: float = -1.6
     mlp_model_path: str | None = None
     mlp_hidden_dim: int = 24
@@ -94,16 +126,31 @@ class TopicRerankerConfig:
 
 
 @dataclass(slots=True)
+class ThemeTokenConfig:
+    enabled: bool = True
+    max_tokens: int = 6
+    min_tokens: int = 2
+    iterations: int = 4
+    temperature: float = 0.35
+    min_membership: float = 0.08
+    graph_steps: int = 2
+    edge_direction_weight: float = 0.35
+    edge_epsilon: float = 1e-6
+
+
+@dataclass(slots=True)
 class FalsehoodConfig:
     enabled: bool = True
     model_path: str | None = None
     hidden_dim: int = 96
     threshold: float = 0.5
+    penalty_weight: float = 0.55
+    block_high_risk: bool = True
 
 
 @dataclass(slots=True)
 class EngineConfig:
-    transformer_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    transformer_model: str = "sentence-transformers/paraphrase-MiniLM-L3-v2"
     transformer_device: str = "auto"
     trust_model_path: str | None = None
     branch_model_path: str | None = None
@@ -111,7 +158,9 @@ class EngineConfig:
     falsehood_model_path: str | None = None
     limits: SearchLimits = field(default_factory=SearchLimits)
     similarity: SimilarityConfig = field(default_factory=SimilarityConfig)
+    retrieval: RetrievalConfig = field(default_factory=RetrievalConfig)
     trust: TrustConfig = field(default_factory=TrustConfig)
     scoring: ScoringConfig = field(default_factory=ScoringConfig)
     topic_reranker: TopicRerankerConfig = field(default_factory=TopicRerankerConfig)
+    theme_tokens: ThemeTokenConfig = field(default_factory=ThemeTokenConfig)
     falsehood: FalsehoodConfig = field(default_factory=FalsehoodConfig)

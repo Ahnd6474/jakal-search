@@ -25,6 +25,64 @@ class SourceProfile:
 
 
 @dataclass(slots=True)
+class PagePassage:
+    text: str
+    start: int = 0
+    end: int = 0
+    score: float = 0.0
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "text": self.text,
+            "start": self.start,
+            "end": self.end,
+            "score": self.score,
+        }
+
+
+@dataclass(slots=True)
+class ThemeToken:
+    token_id: str
+    label: str
+    score: float
+    query: str = ""
+    asset_condition: str = ""
+    base_score: float = 0.0
+    state_norm: float = 0.0
+    topic_norm: float = 0.0
+    anchor_document_ids: list[str] = field(default_factory=list)
+    anchor_titles: list[str] = field(default_factory=list)
+    attention_document_ids: list[str] = field(default_factory=list)
+    attention_titles: list[str] = field(default_factory=list)
+    member_count: int = 0
+    top_keywords: list[str] = field(default_factory=list)
+    candidate_scores: list[dict[str, Any]] = field(default_factory=list)
+    outgoing_edges: list[dict[str, Any]] = field(default_factory=list)
+    state_vector: np.ndarray | None = None
+    topic_vector: np.ndarray | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "token_id": self.token_id,
+            "label": self.label,
+            "query": self.query,
+            "asset_condition": self.asset_condition,
+            "score": self.score,
+            "base_score": self.base_score,
+            "state_norm": self.state_norm,
+            "topic_norm": self.topic_norm,
+            "anchor_document_ids": self.anchor_document_ids,
+            "anchor_titles": self.anchor_titles,
+            "attention_document_ids": self.attention_document_ids,
+            "attention_titles": self.attention_titles,
+            "member_count": self.member_count,
+            "top_keywords": self.top_keywords,
+            "candidate_scores": self.candidate_scores,
+            "outgoing_edges": self.outgoing_edges,
+        }
+
+
+@dataclass(slots=True)
 class SearchDocument:
     title: str
     snippet: str
@@ -38,8 +96,19 @@ class SearchDocument:
     trust_score: float = 0.5
     claim_falsehood_score: float = 0.0
     semantic_risk: float = 0.0
+    retrieval_score: float = 0.0
+    dense_score: float = 0.0
+    lexical_score: float = 0.0
+    provider_score: float = 0.0
+    freshness_score: float = 0.0
+    entity_score: float = 0.0
+    published_at: str | None = None
+    published_at_precision: str = "unknown"
+    contradiction_label: str = "unknown"
+    contradiction_cluster_id: int | None = None
     embedding: np.ndarray | None = None
     cluster_id: int | None = None
+    passages: list[PagePassage] = field(default_factory=list)
     source_profile: SourceProfile | None = None
 
     def __post_init__(self) -> None:
@@ -70,8 +139,19 @@ class SearchDocument:
             trust_score=self.trust_score,
             claim_falsehood_score=self.claim_falsehood_score,
             semantic_risk=self.semantic_risk,
+            retrieval_score=self.retrieval_score,
+            dense_score=self.dense_score,
+            lexical_score=self.lexical_score,
+            provider_score=self.provider_score,
+            freshness_score=self.freshness_score,
+            entity_score=self.entity_score,
+            published_at=self.published_at,
+            published_at_precision=self.published_at_precision,
+            contradiction_label=self.contradiction_label,
+            contradiction_cluster_id=self.contradiction_cluster_id,
             embedding=None if self.embedding is None else self.embedding.copy(),
             cluster_id=self.cluster_id,
+            passages=[PagePassage(**passage.to_dict()) for passage in self.passages],
             source_profile=None if self.source_profile is None else SourceProfile(**self.source_profile.to_dict()),
         )
 
@@ -88,8 +168,19 @@ class SearchDocument:
             "trust_score": self.trust_score,
             "claim_falsehood_score": self.claim_falsehood_score,
             "semantic_risk": self.semantic_risk,
+            "retrieval_score": self.retrieval_score,
+            "dense_score": self.dense_score,
+            "lexical_score": self.lexical_score,
+            "provider_score": self.provider_score,
+            "freshness_score": self.freshness_score,
+            "entity_score": self.entity_score,
+            "published_at": self.published_at,
+            "published_at_precision": self.published_at_precision,
+            "contradiction_label": self.contradiction_label,
+            "contradiction_cluster_id": self.contradiction_cluster_id,
             "embedding_dim": self.embedding_dim,
             "cluster_id": None if self.cluster_id is None else int(self.cluster_id),
+            "passages": [passage.to_dict() for passage in self.passages],
             "metadata": self.metadata,
             "source_profile": None if self.source_profile is None else self.source_profile.to_dict(),
         }
@@ -112,6 +203,8 @@ class SearchNode:
     centroid: np.ndarray | None = None
     children: list[str] = field(default_factory=list)
     metrics: dict[str, float | int | str] = field(default_factory=dict)
+    topic: TopicProposal | None = None
+    theme_tokens: list[ThemeToken] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -233,6 +326,8 @@ class SearchTree:
                 "stop_reason": node.stop_reason,
                 "children": node.children,
                 "metrics": node.metrics,
+                "topic": None if node.topic is None else node.topic.to_dict(),
+                "theme_tokens": [token.to_dict() for token in node.theme_tokens],
                 "docs": [doc.to_dict() for doc in node.docs],
             }
         return payload
@@ -244,6 +339,7 @@ class DocumentMemoryItem:
     document_id: str
     url: str
     embedding: np.ndarray
+    passage_signature: str = ""
 
 
 @dataclass(slots=True)
@@ -258,6 +354,16 @@ class TopicProposal:
     query: str
     keywords: list[str]
     evidence_document_ids: list[str] = field(default_factory=list)
+    candidate_scores: list[dict[str, Any]] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "label": self.label,
+            "query": self.query,
+            "keywords": self.keywords,
+            "evidence_document_ids": self.evidence_document_ids,
+            "candidate_scores": self.candidate_scores,
+        }
 
 
 @dataclass(slots=True)
@@ -276,6 +382,12 @@ class BranchMetrics:
     vector_consistency: float
     size_score: float
     drift: float
+    source_diversity: float = 0.0
+    evidence_coverage: float = 0.0
+    falsehood_penalty: float = 0.0
+    freshness: float = 0.0
+    entity_alignment: float = 0.0
+    contradiction_penalty: float = 0.0
 
 
 @dataclass(slots=True)
@@ -299,6 +411,12 @@ class BranchState:
             "support": round(self.metrics.support, 4),
             "vector_consistency": round(self.metrics.vector_consistency, 4),
             "drift": round(self.metrics.drift, 4),
+            "source_diversity": round(self.metrics.source_diversity, 4),
+            "evidence_coverage": round(self.metrics.evidence_coverage, 4),
+            "falsehood_penalty": round(self.metrics.falsehood_penalty, 4),
+            "freshness": round(self.metrics.freshness, 4),
+            "entity_alignment": round(self.metrics.entity_alignment, 4),
+            "contradiction_penalty": round(self.metrics.contradiction_penalty, 4),
             "keyword_count": len(self.topic.keywords),
             "evidence_count": len(self.topic.evidence_document_ids),
             "decision_reason": self.decision.reason,

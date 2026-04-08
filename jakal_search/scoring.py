@@ -21,6 +21,12 @@ def branch_metrics_to_vector(metrics: BranchMetrics) -> np.ndarray:
             metrics.vector_consistency,
             metrics.size_score,
             metrics.drift,
+            metrics.source_diversity,
+            metrics.evidence_coverage,
+            metrics.falsehood_penalty,
+            metrics.freshness,
+            metrics.entity_alignment,
+            metrics.contradiction_penalty,
         ],
         dtype=np.float32,
     )
@@ -84,6 +90,10 @@ class BranchDecisionModel:
             return BranchDecision(allowed=False, probability=0.0, reason="out_of_scope")
         if metrics.vector_consistency < self._config.min_vector_consistency and metrics.novelty < 0.35:
             return BranchDecision(allowed=False, probability=0.0, reason="unstable_vector_path")
+        if metrics.falsehood_penalty >= 0.72 and metrics.trust < 0.55:
+            return BranchDecision(allowed=False, probability=0.0, reason="high_falsehood_risk")
+        if metrics.contradiction_penalty >= 0.78 and metrics.evidence_coverage < 0.2:
+            return BranchDecision(allowed=False, probability=0.0, reason="weakly_supported_contradiction")
 
         if self._head is not None:
             probability = self._predict_probability(metrics)
@@ -99,6 +109,12 @@ class BranchDecisionModel:
             + (self._config.support_weight * metrics.support)
             + (self._config.vector_weight * metrics.vector_consistency)
             + (self._config.size_weight * metrics.size_score)
+            + (self._config.source_diversity_weight * metrics.source_diversity)
+            + (self._config.evidence_weight * min(metrics.evidence_coverage, 1.0))
+            + (self._config.freshness_weight * metrics.freshness)
+            + (self._config.entity_weight * metrics.entity_alignment)
+            - (self._config.falsehood_weight * metrics.falsehood_penalty)
+            - (self._config.contradiction_weight * metrics.contradiction_penalty)
         )
         probability = float(logistic(linear))
         if probability < self._config.min_continue_probability:
@@ -108,7 +124,7 @@ class BranchDecisionModel:
     def _predict_probability(self, metrics: BranchMetrics) -> float:
         if self._head is None:
             return 0.5
-        vector = branch_metrics_to_vector(metrics)
+        vector = self._fit_feature_vector(branch_metrics_to_vector(metrics), self._head.layers[0].in_features)
         with torch.no_grad():
             logits = self._head(torch.from_numpy(vector).unsqueeze(0))
             return float(torch.sigmoid(logits).item())
@@ -126,3 +142,10 @@ class BranchDecisionModel:
         model.eval()
         self._head = model
         self._threshold = float(payload.get("threshold", self._config.mlp_threshold))
+
+    def _fit_feature_vector(self, vector: np.ndarray, input_dim: int) -> np.ndarray:
+        if vector.shape[0] == input_dim:
+            return vector
+        if vector.shape[0] > input_dim:
+            return vector[:input_dim]
+        return np.pad(vector, (0, input_dim - vector.shape[0]), mode="constant")

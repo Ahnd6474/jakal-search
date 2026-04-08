@@ -90,8 +90,8 @@ def _synthetic_example(bucket: list[BranchExample], *, label: int, rng: np.rando
     anchor = bucket[int(rng.integers(0, len(bucket)))]
     peer = bucket[int(rng.integers(0, len(bucket)))]
     alpha = float(rng.uniform(0.25, 0.75))
-    noise = rng.normal(0.0, 0.03 if label == 1 else 0.05, size=7)
     base = (alpha * branch_metrics_to_vector(anchor.metrics)) + ((1.0 - alpha) * branch_metrics_to_vector(peer.metrics))
+    noise = rng.normal(0.0, 0.03 if label == 1 else 0.05, size=base.shape[0])
     values = base + noise
     if label == 1:
         values[0] = _clip_metric(max(values[0], 0.32))
@@ -109,6 +109,9 @@ def _synthetic_example(bucket: list[BranchExample], *, label: int, rng: np.rando
         vector_consistency=_clip_metric(values[4]),
         size_score=_clip_metric(values[5]),
         drift=_clip_metric(values[6]),
+        source_diversity=_clip_metric(values[7]) if len(values) > 7 else 0.0,
+        evidence_coverage=_clip_metric(values[8]) if len(values) > 8 else 0.0,
+        falsehood_penalty=_clip_metric(values[9]) if len(values) > 9 else 0.0,
     )
     return BranchExample(
         metrics=metrics,
@@ -374,7 +377,7 @@ def evaluate_branch_model(model: BranchDecisionMLP, features: np.ndarray, labels
 def main() -> int:
     parser = argparse.ArgumentParser(description="Train a branch decision head from the local benchmark suite.")
     parser.add_argument("--embedder", choices=["synthetic", "sentence-transformer"], default="synthetic")
-    parser.add_argument("--model-name", default="sentence-transformers/all-MiniLM-L6-v2")
+    parser.add_argument("--model-name", default="sentence-transformers/paraphrase-MiniLM-L3-v2")
     parser.add_argument("--device", default="auto")
     parser.add_argument("--output-dir", type=Path, default=Path("outputs") / "models")
     parser.add_argument("--dataset-out", type=Path, default=Path("outputs") / "datasets" / "branch_dataset.jsonl")

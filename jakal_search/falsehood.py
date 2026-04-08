@@ -44,9 +44,17 @@ class ClaimFalsehoodScorer:
         if len(vectors) != len(documents):
             return documents
         scores = self.score_vectors(np.asarray(vectors, dtype=np.float32))
+        kept_documents: list[SearchDocument] = []
         for doc, score in zip(documents, scores):
             doc.claim_falsehood_score = float(score)
-        return documents
+            doc.trust_score = max(
+                0.0,
+                min(1.0, doc.trust_score * (1.0 - (self._config.penalty_weight * doc.claim_falsehood_score))),
+            )
+            if self._config.block_high_risk and doc.claim_falsehood_score >= self._threshold:
+                continue
+            kept_documents.append(doc)
+        return kept_documents
 
     def score_vectors(self, vectors: np.ndarray) -> np.ndarray:
         if self._model is None or vectors.size == 0:

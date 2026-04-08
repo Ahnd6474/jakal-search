@@ -335,6 +335,7 @@ def default_tuning_config() -> EngineConfig:
     config.limits.min_results = 3
     config.limits.min_cluster_size = 3
     config.limits.results_per_query = 8
+    config.retrieval.enable_page_fetch = False
     config.similarity.dedupe_threshold = 0.995
     config.similarity.novelty_threshold = 0.18
     config.similarity.scope_threshold = 0.2
@@ -386,7 +387,9 @@ def clone_config(config: EngineConfig) -> EngineConfig:
             trusted_prototypes=tuple(config.trust.trusted_prototypes),
             suspicious_prototypes=tuple(config.trust.suspicious_prototypes),
         ),
+        retrieval=replace(config.retrieval),
         scoring=replace(config.scoring),
+        falsehood=replace(config.falsehood),
     )
 
 
@@ -433,6 +436,8 @@ def score_case(case: BenchmarkCase, tree: SearchTree) -> CaseEvaluation:
     kept_titles = [doc.title.lower() for doc in root.docs]
     kept_sources = [doc.source for doc in root.docs]
     child_scores = [tree.nodes[child_id].score for child_id in root.children]
+    retrieval_scores = [doc.retrieval_score for doc in root.docs]
+    evidence_scores = [doc.passages[0].score for doc in root.docs if doc.passages]
 
     score = 0.0
     if root.status == "expanded":
@@ -455,6 +460,10 @@ def score_case(case: BenchmarkCase, tree: SearchTree) -> CaseEvaluation:
     unique_count = int(root.metrics.get("unique_count", 0))
     score += min(trusted_count / max(case.expected_trusted_docs, 1), 1.0) * 10.0
     score += min(unique_count / max(case.expected_trusted_docs, 1), 1.0) * 5.0
+    if retrieval_scores:
+        score += min(float(np.mean(retrieval_scores)), 1.0) * 6.0
+    if evidence_scores:
+        score += min(float(np.mean(evidence_scores)), 1.0) * 4.0
 
     if child_scores:
         score += float(np.mean(child_scores)) * 10.0
@@ -514,7 +523,7 @@ def tune(
     limit: int | None = None,
     *,
     embedder_kind: str = "synthetic",
-    model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
+    model_name: str = "sentence-transformers/paraphrase-MiniLM-L3-v2",
     device: str = "auto",
 ) -> tuple[TuningResult, list[TuningResult]]:
     base_config = default_tuning_config()
@@ -543,6 +552,7 @@ def engine_config_to_dict(config: EngineConfig) -> dict[str, object]:
         "transformer_device": config.transformer_device,
         "limits": asdict(config.limits),
         "similarity": asdict(config.similarity),
+        "retrieval": asdict(config.retrieval),
         "trust": {
             "min_domain_trust": config.trust.min_domain_trust,
             "low_trust_semantic_threshold": config.trust.low_trust_semantic_threshold,
@@ -559,6 +569,7 @@ def engine_config_to_dict(config: EngineConfig) -> dict[str, object]:
             "suspicious_prototypes": list(config.trust.suspicious_prototypes),
         },
         "scoring": asdict(config.scoring),
+        "falsehood": asdict(config.falsehood),
     }
 
 
@@ -573,7 +584,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--model-name",
-        default="sentence-transformers/all-MiniLM-L6-v2",
+        default="sentence-transformers/paraphrase-MiniLM-L3-v2",
         help="Sentence Transformer model name to use when --embedder sentence-transformer is selected.",
     )
     parser.add_argument(

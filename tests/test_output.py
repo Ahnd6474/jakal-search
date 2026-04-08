@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import json
+
 import numpy as np
 
 from jakal_search.config import EngineConfig
 from jakal_search.engine import SearchTreeEngine
-from jakal_search.output import render_json, render_report, render_tree, render_urls
-from jakal_search.types import SearchDocument
+from jakal_search.output import render_json, render_records, render_report, render_tree, render_urls
+from jakal_search.types import SearchDocument, SearchRequest
 from jakal_search.utils import normalize_rows
 
 
-def make_doc(title: str, source: str, query: str) -> SearchDocument:
+def make_doc(title: str, source: str, query: str, published_at: str = "2026-04-07T12:00:00Z") -> SearchDocument:
     return SearchDocument(
         title=title,
         snippet=title,
@@ -17,6 +19,8 @@ def make_doc(title: str, source: str, query: str) -> SearchDocument:
         source=source,
         query=query,
         rank=1,
+        published_at=published_at,
+        published_at_precision="datetime",
     )
 
 
@@ -85,7 +89,7 @@ TRACKING_DOCS = [
 ]
 
 
-def make_tree():
+def make_tree(*, as_of: str | None = None):
     config = EngineConfig()
     config.limits.max_depth = 2
     config.limits.min_results = 3
@@ -96,7 +100,9 @@ def make_tree():
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
-    return engine.run("search system")
+    if as_of is None:
+        return engine.run("search system")
+    return engine.run(SearchRequest(query="search system", metadata={"as_of": as_of}))
 
 
 def test_render_report_groups_results_by_topic() -> None:
@@ -108,6 +114,8 @@ def test_render_report_groups_results_by_topic() -> None:
     assert "policy" in report.lower()
     assert "vector" in report.lower()
     assert "Sources" in report
+    assert "evidence=" in report
+    assert "retrieval=" in report
 
 
 def test_render_urls_returns_unique_urls() -> None:
@@ -134,3 +142,33 @@ def test_render_tree_and_json_keep_existing_views() -> None:
     assert '"content"' in json_output
     assert '"embedding_dim"' in json_output
     assert '"source_profile"' in json_output
+    assert '"topic"' in json_output
+    assert '"theme_tokens"' in json_output
+    assert '"outgoing_edges"' in json_output
+    assert '"asset_condition"' in json_output
+    assert '"candidate_scores"' in json_output
+
+
+def test_render_records_emits_machine_readable_cutoff_fields() -> None:
+    tree = make_tree(as_of="2026-04-08T09:00:00Z")
+    records = json.loads(render_records(tree))
+
+    assert records
+    first = records[0]
+    assert first["as_of"] == "2026-04-08T09:00:00Z"
+    assert "published_at_precision" in first
+    assert "lag_seconds" in first
+    assert "dense_score" in first
+    assert "lexical_score" in first
+    assert "provider_score" in first
+    assert "embedding_text" in first
+    assert "theme_memberships" in first
+    assert "topic_memberships" in first
+    assert any(record["theme_memberships"] for record in records)
+    assert any("base_score" in membership for record in records for membership in record["theme_memberships"])
+    assert any(record["topic_memberships"] for record in records)
+    assert any(
+        "candidate_scores" in membership
+        for record in records
+        for membership in record["topic_memberships"]
+    )

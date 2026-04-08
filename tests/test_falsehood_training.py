@@ -43,7 +43,7 @@ def test_claim_falsehood_scorer_loads_head_and_scores(tmp_path: Path) -> None:
         },
         model_path,
     )
-    scorer = ClaimFalsehoodScorer(FalsehoodConfig(model_path=str(model_path)))
+    scorer = ClaimFalsehoodScorer(FalsehoodConfig(model_path=str(model_path), block_high_risk=False))
     doc = SearchDocument(
         title="claim",
         snippet="claim",
@@ -58,6 +58,7 @@ def test_claim_falsehood_scorer_loads_head_and_scores(tmp_path: Path) -> None:
 
     assert scorer.enabled is True
     assert scored[0].claim_falsehood_score >= 0.0
+    assert scored[0].trust_score <= 0.5
 
 
 def test_falsehood_evaluate_model_returns_metrics() -> None:
