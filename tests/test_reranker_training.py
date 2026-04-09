@@ -21,7 +21,7 @@ def test_build_reranker_examples_contains_labels() -> None:
     assert len(rows) >= 20
 
 
-def test_topic_query_reranker_prefers_relevant_candidate(tmp_path: Path) -> None:
+def test_topic_query_reranker_prefers_relevant_candidate(local_tmp_path: Path) -> None:
     rows = build_reranker_examples(
         embedder_kind="synthetic",
         model_name="unused",
@@ -30,7 +30,7 @@ def test_topic_query_reranker_prefers_relevant_candidate(tmp_path: Path) -> None
     )
     model_path, metrics = train_reranker(
         rows,
-        tmp_path,
+        local_tmp_path,
         hidden_dim=12,
         epochs=20,
         learning_rate=1e-2,

@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any, Protocol
 
 import numpy as np
-from sklearn.feature_extraction.text import HashingVectorizer
 
 from .utils import normalize_rows
 
@@ -13,38 +12,22 @@ class TextEmbedder(Protocol):
         ...
 
 
-class HashingEmbedder:
-    def __init__(self, n_features: int = 384) -> None:
-        self._vectorizer = HashingVectorizer(
-            alternate_sign=False,
-            n_features=n_features,
-            norm=None,
-            stop_words="english",
-        )
-
-    def embed(self, texts: list[str]) -> np.ndarray:
-        if not texts:
-            return np.empty((0, 0), dtype=np.float32)
-        matrix = self._vectorizer.transform(texts)
-        return normalize_rows(matrix.toarray().astype(np.float32))
-
-
 class SentenceTransformerEmbedder:
     def __init__(
         self,
         model_name: str,
         device: str = "auto",
-        fallback: TextEmbedder | None = None,
     ) -> None:
-        self._fallback = fallback or HashingEmbedder()
         self._model = None
         self._device = resolve_transformer_device(device)
         try:
             from sentence_transformers import SentenceTransformer  # type: ignore
 
             self._model = SentenceTransformer(model_name, device=self._device)
-        except ImportError:
-            self._model = None
+        except ImportError as exc:
+            raise RuntimeError(
+                "sentence-transformers is required. Install the project dependencies before running jakal-search."
+            ) from exc
 
     @property
     def using_transformer(self) -> bool:
@@ -57,8 +40,6 @@ class SentenceTransformerEmbedder:
     def embed(self, texts: list[str]) -> np.ndarray:
         if not texts:
             return np.empty((0, 0), dtype=np.float32)
-        if self._model is None:
-            return self._fallback.embed(texts)
         encode = self._model.encode
         if _is_directml_device(self._device) and hasattr(encode, "__wrapped__"):
             vectors = encode.__wrapped__(self._model, texts, normalize_embeddings=True)

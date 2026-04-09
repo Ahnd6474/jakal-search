@@ -24,12 +24,28 @@ DEFAULT_DOMAIN_TRUST = {
 @dataclass(slots=True)
 class SearchLimits:
     max_depth: int = 3
-    max_total_nodes: int = 24
+    max_total_topics: int = 24
     frontier_width: int = 6
-    max_children_per_node: int = 4
+    max_subtopics_per_topic: int = 4
     results_per_query: int = 12
     min_results: int = 4
     min_cluster_size: int = 3
+
+    @property
+    def max_total_nodes(self) -> int:
+        return self.max_total_topics
+
+    @max_total_nodes.setter
+    def max_total_nodes(self, value: int) -> None:
+        self.max_total_topics = value
+
+    @property
+    def max_children_per_node(self) -> int:
+        return self.max_subtopics_per_topic
+
+    @max_children_per_node.setter
+    def max_children_per_node(self, value: int) -> None:
+        self.max_subtopics_per_topic = value
 
 
 @dataclass(slots=True)
@@ -128,14 +144,12 @@ class TopicRerankerConfig:
 @dataclass(slots=True)
 class ThemeTokenConfig:
     enabled: bool = True
-    max_tokens: int = 6
-    min_tokens: int = 2
-    iterations: int = 4
     temperature: float = 0.35
     min_membership: float = 0.08
     graph_steps: int = 2
-    edge_direction_weight: float = 0.35
-    edge_epsilon: float = 1e-6
+    refinement_steps: int = 2
+    max_state_iterations: int = 2
+    state_convergence_threshold: float = 0.08
 
 
 @dataclass(slots=True)
@@ -153,6 +167,7 @@ class EngineConfig:
     transformer_model: str = "sentence-transformers/paraphrase-MiniLM-L3-v2"
     transformer_device: str = "auto"
     trust_model_path: str | None = None
+    expansion_model_path: str | None = None
     branch_model_path: str | None = None
     topic_reranker_model_path: str | None = None
     falsehood_model_path: str | None = None

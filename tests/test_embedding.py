@@ -70,7 +70,6 @@ def test_sentence_transformer_embedder_uses_undecorated_encode_for_directml(monk
             self.encode = decorated
 
     embedder = SentenceTransformerEmbedder.__new__(SentenceTransformerEmbedder)
-    embedder._fallback = None
     embedder._model = FakeModel()
     embedder._device = types.SimpleNamespace(type="privateuseone")
 

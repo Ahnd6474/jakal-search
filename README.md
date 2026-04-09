@@ -29,16 +29,10 @@ pip install jakal-search
 jakal-search "graph search systems"
 ```
 
-If you want transformer embeddings instead of the hashing fallback:
-
-```bash
-pip install "jakal-search[models]"
-```
-
 On Windows, DirectML is the practical GPU path for Intel integrated graphics:
 
 ```bash
-pip install "jakal-search[models,directml]"
+pip install "jakal-search[directml]"
 jakal-search "graph search systems" --device directml
 ```
 
@@ -46,12 +40,6 @@ For local development:
 
 ```bash
 pip install -e .[dev]
-```
-
-For local development with transformer support:
-
-```bash
-pip install -e .[dev,models]
 ```
 
 ## Quick start
@@ -71,10 +59,10 @@ python -m jakal_search "AAPL earnings" \
   --format records
 ```
 
-Write the full search tree to disk:
+Write the full JSON snapshot to disk:
 
 ```bash
-python -m jakal_search "semiconductor AI demand" --json-out outputs/tree.json
+python -m jakal_search "semiconductor AI demand" --json-out outputs/search-run.json
 ```
 
 ## What is jakal-search?
@@ -97,23 +85,23 @@ That is why the engine keeps the search layer deterministic and pushes richer mo
 
 ## Search pipeline
 
-At a high level, each node in the search tree does this:
+At a high level, each recursive expansion step does this:
 
 1. Search the web with the current query.
 2. Fetch the top landing pages and extract readable text.
 3. Split pages into passages and rerank documents with lexical, dense, provider, freshness, and entity signals.
 4. Filter low-trust or high-risk material.
-5. Build theme tokens from the surviving document embeddings.
-6. Run a directed fully connected theme graph with no self-edges.
-7. Use the propagated theme states to attend back over documents.
-8. Decode theme-specific topic labels and queries.
-9. Search again with those decoded topic queries.
+5. Project document vectors through the asset-conditioned key transform.
+6. Let a global fixed theme bank attend over those document keys and values.
+7. Recompute scalar theme state from the gathered evidence, then propagate it through a directed asymmetric theme graph.
+8. Decode parallel topic queries from the fixed themes plus the current theme state.
+9. Search again with those decoded topic queries until the theme state stops moving.
 
-The current theme layer is not just "keyword extraction." It keeps a latent graph over abstract theme tokens and uses the graph output to produce the next round of topic queries.
+The current theme layer is not just "keyword extraction." It uses a global fixed theme basis, recomputes soft evidence state from documents on every step, and uses that state to produce the next round of topic queries.
 
 ## Why the theme graph matters
 
-The graph is there to let indirect relationships survive the search stage.
+The graph is there to let indirect relationships survive the search stage without recreating themes from scratch at every step.
 
 Examples:
 
@@ -121,11 +109,11 @@ Examples:
 - war ending -> reconstruction -> construction
 - higher oil -> airlines under pressure
 
-The engine does not hard-code those examples as labels. Instead, it builds theme vectors from documents, propagates them through a directed graph, and decodes new topic queries from the propagated states.
+The engine does not hard-code those examples as labels. Instead, it keeps a fixed global theme basis, propagates scalar theme state through a directed asymmetric graph, and decodes new topic queries from the propagated state.
 
 ## Embeddings
 
-Transformer embeddings are optional. If `sentence-transformers` is not installed, the engine falls back to a lightweight hashing embedder.
+`sentence-transformers` is a required runtime dependency. The engine always uses transformer embeddings.
 
 The default transformer model is:
 
@@ -184,8 +172,7 @@ The CLI supports these output modes:
 |--------|----------------|
 | `report` | Human-readable summary |
 | `urls` | URL list only |
-| `tree` | Search tree overview |
-| `json` | Full internal search tree |
+| `json` | Full JSON run snapshot |
 | `answer` | Evidence-first answer summary |
 | `records` | Machine-readable per-document records |
 
@@ -208,8 +195,8 @@ Common options:
 | Option | Description |
 |--------|-------------|
 | `--max-depth` | Maximum recursive depth |
-| `--max-nodes` | Global node budget |
-| `--frontier-width` | How many pending nodes stay in the frontier |
+| `--max-topics` | Global topic budget |
+| `--frontier-width` | How many pending topics stay in the frontier |
 | `--results-per-query` | Provider results per search |
 | `--fetch-top-k` | How many results get landing-page enrichment |
 | `--no-page-fetch` | Skip landing-page fetching |
@@ -217,20 +204,14 @@ Common options:
 | `--stock-news` | Shortcut for market-news settings |
 | `--as-of` | Strict historical cutoff |
 | `--format` | Output mode |
-| `--json-out` | Write full JSON tree to a file |
+| `--json-out` | Write full JSON snapshot to a file |
 | `--device` | `auto`, `cpu`, `cuda`, `mps`, `xpu`, or `directml` |
 | `--trust-model` | Trained trust head |
-| `--branch-model` | Trained branch decision head |
+| `--expansion-model` | Trained expansion decision head |
 | `--topic-reranker-model` | Trained topic/query reranker |
 | `--claim-model` | Trained false-claim head |
 
 ## Examples
-
-### General search with topic expansion
-
-```bash
-python -m jakal_search "graph search systems" --max-depth 3 --format tree
-```
 
 ### Market-news collection for downstream modeling
 
@@ -239,7 +220,7 @@ python -m jakal_search "semiconductor AI demand" \
   --stock-news \
   --as-of 2026-04-08T09:00:00Z \
   --format records \
-  --json-out outputs/semiconductor-tree.json
+  --json-out outputs/semiconductor-run.json
 ```
 
 ### Disable page fetch to run faster
@@ -260,7 +241,7 @@ The package ships with several local utilities:
 
 - `jakal-search-tune`
 - `jakal-search-trust`
-- `jakal-search-branch`
+- `jakal-search-expand`
 - `jakal-search-reranker`
 - `jakal-search-falsehood`
 
@@ -278,7 +259,7 @@ python -m jakal_search "graph search systems" \
   --device directml \
   --trust-model outputs/models/trust_head_sentence-transformers__paraphrase-MiniLM-L3-v2.pt \
   --claim-model outputs/models/claim_falsehood_head_sentence-transformers__paraphrase-MiniLM-L3-v2.pt \
-  --branch-model outputs/models/branch_head.pt \
+  --expansion-model outputs/models/expansion_head.pt \
   --topic-reranker-model outputs/models/topic_reranker_head.pt
 ```
 

@@ -8,9 +8,9 @@ from pathlib import Path
 from typing import Callable
 
 from .config import EngineConfig
-from .engine import SearchTreeEngine, build_default_engine
+from .engine import RecursiveSearchEngine, build_default_engine
 from .tuning import BENCHMARK_CASES
-from .types import SearchDocument, SearchTree
+from .types import SearchDocument, SearchRun
 
 
 @dataclass(slots=True)
@@ -71,7 +71,7 @@ def build_seed_judgments() -> list[JudgedQuery]:
 
 
 def evaluate_engine(
-    engine_factory: Callable[[EngineConfig], SearchTreeEngine],
+    engine_factory: Callable[[EngineConfig], RecursiveSearchEngine],
     config: EngineConfig,
     judged_queries: list[JudgedQuery],
 ) -> MetricBundle:
@@ -82,8 +82,8 @@ def evaluate_engine(
 
     for judged_query in judged_queries:
         engine = engine_factory(config)
-        tree = engine.run(judged_query.query)
-        docs = unique_documents(tree)[:10]
+        run = engine.run(judged_query.query)
+        docs = unique_documents(run)[:10]
         relevance_by_url = {judged.url: judged.relevance for judged in judged_query.judgments}
         gains = [relevance_by_url.get(doc.url, 0) for doc in docs]
         ndcg_scores.append(_ndcg(gains, sorted(relevance_by_url.values(), reverse=True)[:10]))
@@ -101,10 +101,10 @@ def evaluate_engine(
     )
 
 
-def unique_documents(tree: SearchTree) -> list[SearchDocument]:
+def unique_documents(run: SearchRun) -> list[SearchDocument]:
     by_url: dict[str, SearchDocument] = {}
-    for node in sorted(tree.nodes.values(), key=lambda item: (item.depth, -item.score, item.node_id)):
-        for doc in node.docs:
+    for topic in sorted(run.topics.values(), key=lambda item: (item.depth, -item.score, item.topic_id)):
+        for doc in topic.docs:
             existing = by_url.get(doc.url)
             if existing is None or doc.retrieval_score > existing.retrieval_score:
                 by_url[doc.url] = doc

@@ -7,11 +7,11 @@ import torch
 from torch import nn
 
 from .config import ScoringConfig
-from .types import BranchDecision, BranchMetrics, SearchTree
+from .types import ExpansionDecision, ExpansionMetrics, SearchRun
 from .utils import cosine_similarity, logistic, mean_embedding
 
 
-def branch_metrics_to_vector(metrics: BranchMetrics) -> np.ndarray:
+def expansion_metrics_to_vector(metrics: ExpansionMetrics) -> np.ndarray:
     return np.asarray(
         [
             metrics.novelty,
@@ -32,7 +32,7 @@ def branch_metrics_to_vector(metrics: BranchMetrics) -> np.ndarray:
     )
 
 
-class BranchDecisionMLP(nn.Module):
+class ExpansionDecisionMLP(nn.Module):
     def __init__(self, input_dim: int, hidden_dim: int) -> None:
         super().__init__()
         self.layers = nn.Sequential(
@@ -51,12 +51,12 @@ class VectorPathTracker:
     def __init__(self, config: ScoringConfig) -> None:
         self._config = config
 
-    def score(self, tree: SearchTree, node_id: str, candidate_centroid: np.ndarray) -> tuple[float, float]:
-        lineage = list(reversed(tree.ancestry_ids(node_id) + [node_id]))
+    def score(self, run: SearchRun, topic_id: str, candidate_centroid: np.ndarray) -> tuple[float, float]:
+        lineage = list(reversed(run.ancestry_topic_ids(topic_id) + [topic_id]))
         path_vectors = [
-            tree.nodes[ancestor_id].centroid
+            run.topics[ancestor_id].centroid
             for ancestor_id in lineage
-            if tree.nodes[ancestor_id].centroid is not None
+            if run.topics[ancestor_id].centroid is not None
         ]
         if not path_vectors:
             return 1.0, 0.0
@@ -76,30 +76,30 @@ class VectorPathTracker:
         return consistency, drift
 
 
-class BranchDecisionModel:
+class ExpansionDecisionModel:
     def __init__(self, config: ScoringConfig) -> None:
         self._config = config
-        self._head: BranchDecisionMLP | None = None
+        self._head: ExpansionDecisionMLP | None = None
         self._threshold = config.mlp_threshold
         self._maybe_load_model()
 
-    def evaluate(self, metrics: BranchMetrics) -> BranchDecision:
+    def evaluate(self, metrics: ExpansionMetrics) -> ExpansionDecision:
         if metrics.novelty <= 0.0:
-            return BranchDecision(allowed=False, probability=0.0, reason="no_new_information")
+            return ExpansionDecision(allowed=False, probability=0.0, reason="no_new_information")
         if metrics.scope < 0.15:
-            return BranchDecision(allowed=False, probability=0.0, reason="out_of_scope")
+            return ExpansionDecision(allowed=False, probability=0.0, reason="out_of_scope")
         if metrics.vector_consistency < self._config.min_vector_consistency and metrics.novelty < 0.35:
-            return BranchDecision(allowed=False, probability=0.0, reason="unstable_vector_path")
+            return ExpansionDecision(allowed=False, probability=0.0, reason="unstable_vector_path")
         if metrics.falsehood_penalty >= 0.72 and metrics.trust < 0.55:
-            return BranchDecision(allowed=False, probability=0.0, reason="high_falsehood_risk")
+            return ExpansionDecision(allowed=False, probability=0.0, reason="high_falsehood_risk")
         if metrics.contradiction_penalty >= 0.78 and metrics.evidence_coverage < 0.2:
-            return BranchDecision(allowed=False, probability=0.0, reason="weakly_supported_contradiction")
+            return ExpansionDecision(allowed=False, probability=0.0, reason="weakly_supported_contradiction")
 
         if self._head is not None:
             probability = self._predict_probability(metrics)
             if probability < self._threshold:
-                return BranchDecision(allowed=False, probability=probability, reason="branch_model")
-            return BranchDecision(allowed=True, probability=probability, reason="branch_model")
+                return ExpansionDecision(allowed=False, probability=probability, reason="expansion_model")
+            return ExpansionDecision(allowed=True, probability=probability, reason="expansion_model")
 
         linear = (
             self._config.bias
@@ -118,13 +118,13 @@ class BranchDecisionModel:
         )
         probability = float(logistic(linear))
         if probability < self._config.min_continue_probability:
-            return BranchDecision(allowed=False, probability=probability, reason="stop_classifier")
-        return BranchDecision(allowed=True, probability=probability, reason="continue")
+            return ExpansionDecision(allowed=False, probability=probability, reason="stop_classifier")
+        return ExpansionDecision(allowed=True, probability=probability, reason="continue")
 
-    def _predict_probability(self, metrics: BranchMetrics) -> float:
+    def _predict_probability(self, metrics: ExpansionMetrics) -> float:
         if self._head is None:
             return 0.5
-        vector = self._fit_feature_vector(branch_metrics_to_vector(metrics), self._head.layers[0].in_features)
+        vector = self._fit_feature_vector(expansion_metrics_to_vector(metrics), self._head.layers[0].in_features)
         with torch.no_grad():
             logits = self._head(torch.from_numpy(vector).unsqueeze(0))
             return float(torch.sigmoid(logits).item())
@@ -137,7 +137,7 @@ class BranchDecisionModel:
         if not path.exists():
             return
         payload = torch.load(path, map_location="cpu", weights_only=True)
-        model = BranchDecisionMLP(int(payload["input_dim"]), int(payload["hidden_dim"]))
+        model = ExpansionDecisionMLP(int(payload["input_dim"]), int(payload["hidden_dim"]))
         model.load_state_dict(payload["state_dict"])
         model.eval()
         self._head = model
@@ -149,3 +149,8 @@ class BranchDecisionModel:
         if vector.shape[0] > input_dim:
             return vector[:input_dim]
         return np.pad(vector, (0, input_dim - vector.shape[0]), mode="constant")
+
+
+branch_metrics_to_vector = expansion_metrics_to_vector
+BranchDecisionMLP = ExpansionDecisionMLP
+BranchDecisionModel = ExpansionDecisionModel

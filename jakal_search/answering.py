@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from collections import Counter
 
-from .types import SearchDocument, SearchTree
+from .types import SearchDocument, SearchRun
 
 
-def compose_evidence_answer(tree: SearchTree) -> str:
-    root = tree.nodes[tree.root_id]
-    docs = _unique_documents(tree)
+def compose_evidence_answer(run: SearchRun) -> str:
+    root = run.topics[run.root_topic_id]
+    docs = _unique_documents(run)
     top_docs = docs[:5]
     lines = [f"Query: {root.query}", "", "Evidence-First Answer"]
     if not top_docs:
@@ -37,10 +37,10 @@ def compose_evidence_answer(tree: SearchTree) -> str:
     return "\n".join(lines)
 
 
-def _unique_documents(tree: SearchTree) -> list[SearchDocument]:
+def _unique_documents(run: SearchRun) -> list[SearchDocument]:
     by_url: dict[str, SearchDocument] = {}
-    for node in sorted(tree.nodes.values(), key=lambda item: (item.depth, -item.score, item.node_id)):
-        for doc in node.docs:
+    for topic in sorted(run.topics.values(), key=lambda item: (item.depth, -item.score, item.topic_id)):
+        for doc in topic.docs:
             existing = by_url.get(doc.url)
             if existing is None or doc.retrieval_score > existing.retrieval_score:
                 by_url[doc.url] = doc

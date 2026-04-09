@@ -408,16 +408,17 @@ def train_falsehood_head(
     output_dir.mkdir(parents=True, exist_ok=True)
     safe_model_name = model_name.replace("/", "__")
     model_path = output_dir / f"claim_falsehood_head_{safe_model_name}.pt"
-    torch.save(
-        {
-            "state_dict": model.state_dict(),
-            "input_dim": int(train_x.shape[1]),
-            "hidden_dim": hidden_dim,
-            "threshold": threshold,
-            "model_name": model_name,
-        },
-        model_path,
-    )
+    with model_path.open("wb") as handle:
+        torch.save(
+            {
+                "state_dict": model.state_dict(),
+                "input_dim": int(train_x.shape[1]),
+                "hidden_dim": hidden_dim,
+                "threshold": threshold,
+                "model_name": model_name,
+            },
+            handle,
+        )
     model_path.with_suffix(".json").write_text(
         json.dumps(
             {

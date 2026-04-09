@@ -31,18 +31,19 @@ def test_claim_dataset_helpers_balance_and_dedupe() -> None:
     assert sum(item.label == 1 for item in balanced) == sum(item.label == 0 for item in balanced)
 
 
-def test_claim_falsehood_scorer_loads_head_and_scores(tmp_path: Path) -> None:
+def test_claim_falsehood_scorer_loads_head_and_scores(local_tmp_path: Path) -> None:
     model = ClaimFalsehoodMLP(2, 4)
-    model_path = tmp_path / "claim_falsehood.pt"
-    torch.save(
-        {
-            "state_dict": model.state_dict(),
-            "input_dim": 2,
-            "hidden_dim": 4,
-            "threshold": 0.61,
-        },
-        model_path,
-    )
+    model_path = local_tmp_path / "claim_falsehood.pt"
+    with model_path.open("wb") as handle:
+        torch.save(
+            {
+                "state_dict": model.state_dict(),
+                "input_dim": 2,
+                "hidden_dim": 4,
+                "threshold": 0.61,
+            },
+            handle,
+        )
     scorer = ClaimFalsehoodScorer(FalsehoodConfig(model_path=str(model_path), block_high_risk=False))
     doc = SearchDocument(
         title="claim",

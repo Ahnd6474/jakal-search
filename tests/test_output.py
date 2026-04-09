@@ -6,7 +6,7 @@ import numpy as np
 
 from jakal_search.config import EngineConfig
 from jakal_search.engine import SearchTreeEngine
-from jakal_search.output import render_json, render_records, render_report, render_tree, render_urls
+from jakal_search.output import render_json, render_records, render_report, render_urls
 from jakal_search.types import SearchDocument, SearchRequest
 from jakal_search.utils import normalize_rows
 
@@ -89,12 +89,12 @@ TRACKING_DOCS = [
 ]
 
 
-def make_tree(*, as_of: str | None = None):
+def make_run(*, as_of: str | None = None):
     config = EngineConfig()
     config.limits.max_depth = 2
     config.limits.min_results = 3
     config.limits.min_cluster_size = 3
-    config.limits.max_children_per_node = 2
+    config.limits.max_subtopics_per_topic = 2
     config.limits.results_per_query = 8
     config.similarity.dedupe_threshold = 0.995
     config.similarity.scope_threshold = 0.2
@@ -106,7 +106,7 @@ def make_tree(*, as_of: str | None = None):
 
 
 def test_render_report_groups_results_by_topic() -> None:
-    report = render_report(make_tree())
+    report = render_report(make_run())
 
     assert "Query: search system" in report
     assert "Summary" in report
@@ -119,7 +119,7 @@ def test_render_report_groups_results_by_topic() -> None:
 
 
 def test_render_urls_returns_unique_urls() -> None:
-    urls = render_urls(make_tree()).splitlines()
+    urls = render_urls(make_run()).splitlines()
 
     assert urls
     assert len(urls) == len(set(urls))
@@ -127,16 +127,15 @@ def test_render_urls_returns_unique_urls() -> None:
     assert any("arxiv.org" in url for url in urls)
 
 
-def test_render_tree_and_json_keep_existing_views() -> None:
-    tree = make_tree()
-    tree_output = render_tree(tree)
-    json_output = render_json(tree)
+def test_render_json_keeps_existing_snapshot_fields() -> None:
+    run = make_run()
+    json_output = render_json(run)
 
-    assert "- node-0: search system" in tree_output
-    assert '"root_id": "node-0"' in json_output
+    assert '"root_topic_id": "topic-0"' in json_output
     assert '"request"' in json_output
     assert '"expansions"' in json_output
     assert '"logs"' in json_output
+    assert '"topics"' in json_output
     assert '"query": "search system"' in json_output
     assert '"document_id"' in json_output
     assert '"content"' in json_output
@@ -150,8 +149,8 @@ def test_render_tree_and_json_keep_existing_views() -> None:
 
 
 def test_render_records_emits_machine_readable_cutoff_fields() -> None:
-    tree = make_tree(as_of="2026-04-08T09:00:00Z")
-    records = json.loads(render_records(tree))
+    run = make_run(as_of="2026-04-08T09:00:00Z")
+    records = json.loads(render_records(run))
 
     assert records
     first = records[0]

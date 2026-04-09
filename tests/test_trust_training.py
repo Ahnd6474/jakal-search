@@ -50,18 +50,19 @@ def test_extract_email_text_combines_subject_and_body() -> None:
     assert "useful details" in text
 
 
-def test_source_trust_scorer_loads_supervised_head(tmp_path: Path) -> None:
+def test_source_trust_scorer_loads_supervised_head(local_tmp_path: Path) -> None:
     model = EmbeddingTrustMLP(2, 4)
-    model_path = tmp_path / "trust_head.pt"
-    torch.save(
-        {
-            "state_dict": model.state_dict(),
-            "input_dim": 2,
-            "hidden_dim": 4,
-            "threshold": 0.61,
-        },
-        model_path,
-    )
+    model_path = local_tmp_path / "trust_head.pt"
+    with model_path.open("wb") as handle:
+        torch.save(
+            {
+                "state_dict": model.state_dict(),
+                "input_dim": 2,
+                "hidden_dim": 4,
+                "threshold": 0.61,
+            },
+            handle,
+        )
 
     scorer = SourceTrustScorer(TrustConfig(mlp_model_path=str(model_path)), FakeTransformerEmbedder())
 

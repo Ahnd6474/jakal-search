@@ -116,13 +116,13 @@ def test_deduper_keeps_parent_similar_docs_but_blocks_external_duplicates() -> N
         doc.embedding = embedding
     memory = [
         DocumentMemoryItem(
-            node_id="parent",
+            topic_id="parent",
             document_id="https://acm.org/parent",
             url="https://acm.org/parent",
             embedding=embeddings[0],
         ),
         DocumentMemoryItem(
-            node_id="sibling",
+            topic_id="sibling",
             document_id="https://acm.org/sibling",
             url="https://acm.org/sibling",
             embedding=embeddings[1],
@@ -144,19 +144,19 @@ def test_engine_builds_subtopics_and_filters_low_trust_noise() -> None:
     config.limits.max_depth = 2
     config.limits.min_results = 3
     config.limits.min_cluster_size = 3
-    config.limits.max_children_per_node = 2
+    config.limits.max_subtopics_per_topic = 2
     config.limits.results_per_query = 8
     config.similarity.dedupe_threshold = 0.999
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
-    tree = engine.run("search system")
+    run = engine.run("search system")
 
-    root = tree.nodes[tree.root_id]
-    child_queries = {tree.nodes[child_id].query for child_id in root.children}
+    root = run.topics[run.root_topic_id]
+    child_queries = {run.topics[child_id].query for child_id in root.child_topic_ids}
 
     assert root.status == "expanded"
-    assert len(root.children) == 2
+    assert len(root.child_topic_ids) == 2
     assert any("policy" in query for query in child_queries)
     assert any("vector" in query or "tracking" in query for query in child_queries)
     assert all("miracle" not in doc.title for doc in root.docs)
@@ -182,15 +182,15 @@ def test_engine_builds_subtopics_and_filters_low_trust_noise() -> None:
         for token in root.theme_tokens
     )
     assert any(doc.source_profile.source_type == "research" for doc in root.docs if doc.source_profile)
-    assert all("decision_reason" in tree.nodes[child_id].metrics for child_id in root.children)
-    assert all("evidence_coverage" in tree.nodes[child_id].metrics for child_id in root.children)
-    assert all(tree.nodes[child_id].theme_tokens for child_id in root.children)
-    assert all(tree.nodes[child_id].topic is not None for child_id in root.children)
-    assert tree.expansions[root.node_id].raw_document_ids
-    assert tree.expansions[root.node_id].trusted_document_ids
-    assert tree.expansions[root.node_id].unique_document_ids
-    assert tree.logs
-    assert any(event.event_type == "trust_filter" for event in tree.logs)
+    assert all("decision_reason" in run.topics[child_id].metrics for child_id in root.child_topic_ids)
+    assert all("evidence_coverage" in run.topics[child_id].metrics for child_id in root.child_topic_ids)
+    assert all(run.topics[child_id].theme_tokens for child_id in root.child_topic_ids)
+    assert all(run.topics[child_id].topic is not None for child_id in root.child_topic_ids)
+    assert run.expansions[root.topic_id].raw_document_ids
+    assert run.expansions[root.topic_id].trusted_document_ids
+    assert run.expansions[root.topic_id].unique_document_ids
+    assert run.logs
+    assert any(event.event_type == "trust_filter" for event in run.logs)
 
 
 def test_max_depth_stops_expansion() -> None:
@@ -203,11 +203,11 @@ def test_max_depth_stops_expansion() -> None:
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
-    tree = engine.run("search system")
+    run = engine.run("search system")
 
-    for child_id in tree.nodes[tree.root_id].children:
-        assert tree.nodes[child_id].depth == 1
-        assert tree.nodes[child_id].status in {"pending", "pruned", "stopped"}
+    for child_id in run.topics[run.root_topic_id].child_topic_ids:
+        assert run.topics[child_id].depth == 1
+        assert run.topics[child_id].status in {"pending", "pruned", "stopped"}
 
 
 def test_engine_reuse_resets_run_state() -> None:
@@ -215,29 +215,29 @@ def test_engine_reuse_resets_run_state() -> None:
     config.limits.max_depth = 2
     config.limits.min_results = 3
     config.limits.min_cluster_size = 3
-    config.limits.max_children_per_node = 2
+    config.limits.max_subtopics_per_topic = 2
     config.limits.results_per_query = 8
     config.similarity.dedupe_threshold = 0.999
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
 
-    first_tree = engine.run("search system")
-    second_tree = engine.run("search system")
+    first_run = engine.run("search system")
+    second_run = engine.run("search system")
 
-    first_root = first_tree.nodes[first_tree.root_id]
-    second_root = second_tree.nodes[second_tree.root_id]
-    first_queries = {first_tree.nodes[child_id].query for child_id in first_root.children}
-    second_queries = {second_tree.nodes[child_id].query for child_id in second_root.children}
+    first_root = first_run.topics[first_run.root_topic_id]
+    second_root = second_run.topics[second_run.root_topic_id]
+    first_queries = {first_run.topics[child_id].query for child_id in first_root.child_topic_ids}
+    second_queries = {second_run.topics[child_id].query for child_id in second_root.child_topic_ids}
 
-    assert first_tree.root_id == "node-0"
-    assert second_tree.root_id == "node-0"
+    assert first_run.root_topic_id == "topic-0"
+    assert second_run.root_topic_id == "topic-0"
     assert first_root.status == "expanded"
     assert second_root.status == "expanded"
     assert first_root.stop_reason is None
     assert second_root.stop_reason is None
-    assert len(first_root.children) == 2
-    assert len(second_root.children) == 2
+    assert len(first_root.child_topic_ids) == 2
+    assert len(second_root.child_topic_ids) == 2
     assert first_queries == second_queries
 
 
@@ -263,7 +263,7 @@ def test_document_clone_prevents_provider_state_leakage() -> None:
 def test_search_request_overrides_limits_without_mutating_engine_defaults() -> None:
     config = EngineConfig()
     config.limits.max_depth = 3
-    config.limits.max_total_nodes = 24
+    config.limits.max_total_topics = 24
     config.limits.frontier_width = 6
     config.limits.results_per_query = 8
     config.limits.min_results = 3
@@ -275,20 +275,20 @@ def test_search_request_overrides_limits_without_mutating_engine_defaults() -> N
     request = SearchRequest(
         query="search system",
         max_depth=1,
-        max_total_nodes=3,
+        max_total_topics=3,
         frontier_width=2,
         results_per_query=6,
         metadata={"suite": "engine"},
     )
-    tree = engine.run(request)
+    run = engine.run(request)
 
-    assert tree.request is not None
-    assert tree.request.max_depth == 1
-    assert tree.request.metadata["suite"] == "engine"
+    assert run.request is not None
+    assert run.request.max_depth == 1
+    assert run.request.metadata["suite"] == "engine"
     assert engine.config.limits.max_depth == 3
-    assert engine.config.limits.max_total_nodes == 24
-    assert len(tree.nodes) <= 3
-    assert all(tree.nodes[child_id].depth == 1 for child_id in tree.nodes[tree.root_id].children)
+    assert engine.config.limits.max_total_topics == 24
+    assert len(run.topics) <= 3
+    assert all(run.topics[child_id].depth == 1 for child_id in run.topics[run.root_topic_id].child_topic_ids)
 
 
 def test_expansion_context_tracks_stop_reason_for_terminal_nodes() -> None:
@@ -301,12 +301,12 @@ def test_expansion_context_tracks_stop_reason_for_terminal_nodes() -> None:
     config.similarity.scope_threshold = 0.2
 
     engine = SearchTreeEngine(provider=FakeProvider(), embedder=KeywordEmbedder(), config=config)
-    tree = engine.run("search system")
+    run = engine.run("search system")
 
-    for child_id in tree.nodes[tree.root_id].children:
-        child = tree.nodes[child_id]
+    for child_id in run.topics[run.root_topic_id].child_topic_ids:
+        child = run.topics[child_id]
         if child.status == "stopped":
-            context = tree.expansions[child_id]
+            context = run.expansions[child_id]
             assert context.stop_reason == "max_depth"
             assert any(event.event_type == "expand_stopped" for event in context.events)
 
@@ -371,7 +371,7 @@ def test_engine_applies_strict_as_of_cutoff_before_ranking() -> None:
     config.retrieval.enable_page_fetch = False
 
     engine = SearchTreeEngine(provider=TimedProvider(), embedder=KeywordEmbedder(), config=config)
-    tree = engine.run(
+    run = engine.run(
         SearchRequest(
             query="ALPHA stock earnings",
             max_depth=1,
@@ -380,7 +380,7 @@ def test_engine_applies_strict_as_of_cutoff_before_ranking() -> None:
         )
     )
 
-    root = tree.nodes[tree.root_id]
+    root = run.topics[run.root_topic_id]
     kept_urls = {doc.url for doc in root.docs}
 
     assert "https://news.example.com/alpha-preview" in kept_urls
@@ -388,4 +388,4 @@ def test_engine_applies_strict_as_of_cutoff_before_ranking() -> None:
     assert "https://news.example.com/alpha-rumor" not in kept_urls
     assert "https://news.example.com/alpha-dated" not in kept_urls
     assert all(doc.metadata.get("as_of") == "2026-04-08T09:00:00Z" for doc in root.docs)
-    assert any(event.event_type == "as_of_cutoff" for event in tree.logs)
+    assert any(event.event_type == "as_of_cutoff" for event in run.logs)

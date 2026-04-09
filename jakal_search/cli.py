@@ -16,11 +16,12 @@ def main() -> int:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if hasattr(sys.stderr, "reconfigure"):
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
-    parser = argparse.ArgumentParser(description="Tree-based exploratory search engine.")
+    parser = argparse.ArgumentParser(description="Recursive evidence search engine.")
     parser.add_argument("--version", action="version", version=f"jakal-search {__version__}")
     parser.add_argument("query", help="Root search query")
     parser.add_argument("--max-depth", type=int, default=3)
-    parser.add_argument("--max-nodes", type=int, default=24)
+    parser.add_argument("--max-topics", type=int, default=24)
+    parser.add_argument("--max-nodes", dest="max_topics", type=int, default=None, help=argparse.SUPPRESS)
     parser.add_argument("--frontier-width", type=int, default=6)
     parser.add_argument("--results-per-query", type=int, default=12)
     parser.add_argument(
@@ -67,10 +68,17 @@ def main() -> int:
         help="Path to a trained supervised trust head (.pt).",
     )
     parser.add_argument(
-        "--branch-model",
+        "--expansion-model",
         type=Path,
         default=None,
-        help="Path to a trained branch decision head (.pt).",
+        help="Path to a trained expansion decision head (.pt).",
+    )
+    parser.add_argument(
+        "--branch-model",
+        dest="expansion_model",
+        type=Path,
+        default=None,
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--topic-reranker-model",
@@ -86,7 +94,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--format",
-        choices=["report", "urls", "tree", "json", "answer", "records"],
+        choices=["report", "urls", "json", "answer", "records"],
         default="report",
         help="Output format for stdout",
     )
@@ -95,7 +103,7 @@ def main() -> int:
 
     config = EngineConfig()
     config.limits.max_depth = args.max_depth
-    config.limits.max_total_nodes = args.max_nodes
+    config.limits.max_total_topics = args.max_topics
     config.limits.frontier_width = args.frontier_width
     config.limits.results_per_query = args.results_per_query
     config.retrieval.enable_page_fetch = not args.no_page_fetch
@@ -107,7 +115,7 @@ def main() -> int:
         config.scoring.freshness_weight = max(config.scoring.freshness_weight, 0.8)
     config.transformer_device = args.device
     config.trust_model_path = None if args.trust_model is None else str(args.trust_model)
-    config.branch_model_path = None if args.branch_model is None else str(args.branch_model)
+    config.expansion_model_path = None if args.expansion_model is None else str(args.expansion_model)
     config.topic_reranker_model_path = None if args.topic_reranker_model is None else str(args.topic_reranker_model)
     config.falsehood_model_path = None if args.claim_model is None else str(args.claim_model)
 
@@ -115,15 +123,15 @@ def main() -> int:
     request = SearchRequest(
         query=args.query,
         max_depth=args.max_depth,
-        max_total_nodes=args.max_nodes,
+        max_total_topics=args.max_topics,
         frontier_width=args.frontier_width,
         results_per_query=args.results_per_query,
         metadata={"as_of": args.as_of} if args.as_of else {},
     )
-    tree = engine.run(request)
-    print(render_output(tree, args.format))
+    run = engine.run(request)
+    print(render_output(run, args.format))
 
     if args.json_out is not None:
-        args.json_out.write_text(render_output(tree, "json"), encoding="utf-8")
-        print(f"\nWrote JSON tree to {args.json_out}")
+        args.json_out.write_text(render_output(run, "json"), encoding="utf-8")
+        print(f"\nWrote JSON snapshot to {args.json_out}")
     return 0

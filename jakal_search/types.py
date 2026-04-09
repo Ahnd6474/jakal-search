@@ -190,37 +190,69 @@ class SearchDocument:
 
 
 @dataclass(slots=True)
-class SearchNode:
-    node_id: str
+class SearchTopic:
+    topic_id: str
     query: str
     depth: int
-    parent_id: str | None = None
+    parent_topic_id: str | None = None
     score: float = 1.0
     cluster_label: str = ""
     status: str = "pending"
     stop_reason: str | None = None
     docs: list[SearchDocument] = field(default_factory=list)
     centroid: np.ndarray | None = None
-    children: list[str] = field(default_factory=list)
+    child_topic_ids: list[str] = field(default_factory=list)
     metrics: dict[str, float | int | str] = field(default_factory=dict)
     topic: TopicProposal | None = None
     theme_tokens: list[ThemeToken] = field(default_factory=list)
+
+    @property
+    def node_id(self) -> str:
+        return self.topic_id
+
+    @node_id.setter
+    def node_id(self, value: str) -> None:
+        self.topic_id = value
+
+    @property
+    def parent_id(self) -> str | None:
+        return self.parent_topic_id
+
+    @parent_id.setter
+    def parent_id(self, value: str | None) -> None:
+        self.parent_topic_id = value
+
+    @property
+    def children(self) -> list[str]:
+        return self.child_topic_ids
+
+    @children.setter
+    def children(self, value: list[str]) -> None:
+        self.child_topic_ids = value
 
 
 @dataclass(slots=True)
 class SearchRequest:
     query: str
     max_depth: int | None = None
-    max_total_nodes: int | None = None
+    max_total_topics: int | None = None
     frontier_width: int | None = None
     results_per_query: int | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def max_total_nodes(self) -> int | None:
+        return self.max_total_topics
+
+    @max_total_nodes.setter
+    def max_total_nodes(self, value: int | None) -> None:
+        self.max_total_topics = value
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "query": self.query,
             "max_depth": self.max_depth,
-            "max_total_nodes": self.max_total_nodes,
+            "max_total_topics": self.max_total_topics,
             "frontier_width": self.frontier_width,
             "results_per_query": self.results_per_query,
             "metadata": self.metadata,
@@ -230,15 +262,23 @@ class SearchRequest:
 @dataclass(slots=True)
 class SearchLogEvent:
     event_type: str
-    node_id: str
+    topic_id: str
     depth: int
     query: str
     payload: dict[str, Any] = field(default_factory=dict)
 
+    @property
+    def node_id(self) -> str:
+        return self.topic_id
+
+    @node_id.setter
+    def node_id(self, value: str) -> None:
+        self.topic_id = value
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "event_type": self.event_type,
-            "node_id": self.node_id,
+            "topic_id": self.topic_id,
             "depth": self.depth,
             "query": self.query,
             "payload": self.payload,
@@ -247,7 +287,7 @@ class SearchLogEvent:
 
 @dataclass(slots=True)
 class ExpansionContext:
-    node_id: str
+    topic_id: str
     query: str
     depth: int
     raw_document_ids: list[str] = field(default_factory=list)
@@ -257,10 +297,18 @@ class ExpansionContext:
     stop_reason: str | None = None
     events: list[SearchLogEvent] = field(default_factory=list)
 
+    @property
+    def node_id(self) -> str:
+        return self.topic_id
+
+    @node_id.setter
+    def node_id(self, value: str) -> None:
+        self.topic_id = value
+
     def record_event(self, event_type: str, payload: dict[str, Any] | None = None) -> SearchLogEvent:
         event = SearchLogEvent(
             event_type=event_type,
-            node_id=self.node_id,
+            topic_id=self.topic_id,
             depth=self.depth,
             query=self.query,
             payload={} if payload is None else payload,
@@ -270,7 +318,7 @@ class ExpansionContext:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "node_id": self.node_id,
+            "topic_id": self.topic_id,
             "query": self.query,
             "depth": self.depth,
             "raw_document_ids": self.raw_document_ids,
@@ -283,69 +331,104 @@ class ExpansionContext:
 
 
 @dataclass(slots=True)
-class SearchTree:
-    root_id: str
+class SearchRun:
+    root_topic_id: str
     request: SearchRequest | None = None
-    nodes: dict[str, SearchNode] = field(default_factory=dict)
+    topics: dict[str, SearchTopic] = field(default_factory=dict)
     expansions: dict[str, ExpansionContext] = field(default_factory=dict)
     logs: list[SearchLogEvent] = field(default_factory=list)
 
-    def add_node(self, node: SearchNode) -> None:
-        self.nodes[node.node_id] = node
+    @property
+    def root_id(self) -> str:
+        return self.root_topic_id
+
+    @root_id.setter
+    def root_id(self, value: str) -> None:
+        self.root_topic_id = value
+
+    @property
+    def nodes(self) -> dict[str, SearchTopic]:
+        return self.topics
+
+    def add_topic(self, topic: SearchTopic) -> None:
+        self.topics[topic.topic_id] = topic
+
+    def add_node(self, node: SearchTopic) -> None:
+        self.add_topic(node)
 
     def add_expansion(self, context: ExpansionContext) -> None:
-        self.expansions[context.node_id] = context
+        self.expansions[context.topic_id] = context
 
     def log_event(self, event: SearchLogEvent) -> None:
         self.logs.append(event)
 
-    def ancestry_ids(self, node_id: str) -> list[str]:
+    def ancestry_topic_ids(self, topic_id: str) -> list[str]:
         lineage: list[str] = []
-        current = self.nodes[node_id]
-        while current.parent_id is not None:
-            lineage.append(current.parent_id)
-            current = self.nodes[current.parent_id]
+        current = self.topics[topic_id]
+        while current.parent_topic_id is not None:
+            lineage.append(current.parent_topic_id)
+            current = self.topics[current.parent_topic_id]
         return lineage
+
+    def ancestry_ids(self, node_id: str) -> list[str]:
+        return self.ancestry_topic_ids(node_id)
 
     def to_dict(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
-            "root_id": self.root_id,
+            "root_topic_id": self.root_topic_id,
             "request": None if self.request is None else self.request.to_dict(),
-            "expansions": {node_id: context.to_dict() for node_id, context in self.expansions.items()},
+            "expansions": {topic_id: context.to_dict() for topic_id, context in self.expansions.items()},
             "logs": [event.to_dict() for event in self.logs],
-            "nodes": {},
+            "topics": {},
         }
-        for node_id, node in self.nodes.items():
-            payload["nodes"][node_id] = {
-                "query": node.query,
-                "depth": node.depth,
-                "parent_id": node.parent_id,
-                "score": node.score,
-                "cluster_label": node.cluster_label,
-                "status": node.status,
-                "stop_reason": node.stop_reason,
-                "children": node.children,
-                "metrics": node.metrics,
-                "topic": None if node.topic is None else node.topic.to_dict(),
-                "theme_tokens": [token.to_dict() for token in node.theme_tokens],
-                "docs": [doc.to_dict() for doc in node.docs],
+        for topic_id, topic in self.topics.items():
+            payload["topics"][topic_id] = {
+                "topic_id": topic.topic_id,
+                "query": topic.query,
+                "depth": topic.depth,
+                "parent_topic_id": topic.parent_topic_id,
+                "score": topic.score,
+                "cluster_label": topic.cluster_label,
+                "status": topic.status,
+                "stop_reason": topic.stop_reason,
+                "child_topic_ids": topic.child_topic_ids,
+                "metrics": topic.metrics,
+                "topic": None if topic.topic is None else topic.topic.to_dict(),
+                "theme_tokens": [token.to_dict() for token in topic.theme_tokens],
+                "docs": [doc.to_dict() for doc in topic.docs],
             }
         return payload
 
 
 @dataclass(slots=True)
 class DocumentMemoryItem:
-    node_id: str
+    topic_id: str
     document_id: str
     url: str
     embedding: np.ndarray
     passage_signature: str = ""
 
+    @property
+    def node_id(self) -> str:
+        return self.topic_id
+
+    @node_id.setter
+    def node_id(self, value: str) -> None:
+        self.topic_id = value
+
 
 @dataclass(slots=True)
 class TopicMemoryItem:
-    node_id: str
+    topic_id: str
     embedding: np.ndarray
+
+    @property
+    def node_id(self) -> str:
+        return self.topic_id
+
+    @node_id.setter
+    def node_id(self, value: str) -> None:
+        self.topic_id = value
 
 
 @dataclass(slots=True)
@@ -374,7 +457,7 @@ class ClusterResult:
 
 
 @dataclass(slots=True)
-class BranchMetrics:
+class ExpansionMetrics:
     novelty: float
     trust: float
     scope: float
@@ -391,19 +474,19 @@ class BranchMetrics:
 
 
 @dataclass(slots=True)
-class BranchDecision:
+class ExpansionDecision:
     allowed: bool
     probability: float
     reason: str
 
 
 @dataclass(slots=True)
-class BranchState:
+class ExpansionState:
     topic: TopicProposal
-    metrics: BranchMetrics
-    decision: BranchDecision
+    metrics: ExpansionMetrics
+    decision: ExpansionDecision
 
-    def to_node_metrics(self) -> dict[str, float | int | str]:
+    def to_topic_metrics(self) -> dict[str, float | int | str]:
         return {
             "novelty": round(self.metrics.novelty, 4),
             "trust": round(self.metrics.trust, 4),
@@ -421,3 +504,14 @@ class BranchState:
             "evidence_count": len(self.topic.evidence_document_ids),
             "decision_reason": self.decision.reason,
         }
+
+    def to_node_metrics(self) -> dict[str, float | int | str]:
+        return self.to_topic_metrics()
+
+
+SearchTree = SearchRun
+SearchNode = SearchTopic
+
+BranchMetrics = ExpansionMetrics
+BranchDecision = ExpansionDecision
+BranchState = ExpansionState

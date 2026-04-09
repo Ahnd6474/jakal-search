@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import torch
 
 from jakal_search.config import ThemeTokenConfig, TopicRerankerConfig
 from jakal_search.theme_tokens import ThemeTokenInducer
@@ -102,3 +103,39 @@ def test_topic_builder_decodes_topics_from_theme_graph_vectors() -> None:
     assert all(token.query for token in theme_tokens)
     assert all(token.candidate_scores for token in theme_tokens)
     assert any("policy" in token.label or "governance" in token.label for token in theme_tokens)
+
+
+def test_theme_state_space_supports_gradients_through_topic_latents() -> None:
+    docs = [
+        make_doc(
+            "policy governance roadmap",
+            "policy governance roadmap with detailed evidence and supporting explanation for search system operators",
+        ),
+        make_doc(
+            "tracking vector drift",
+            "tracking vector drift for search system branches and monitoring",
+        ),
+    ]
+    embedder = FakeTransformerEmbedder()
+    for doc, vector in zip(docs, embedder.embed([doc.text for doc in docs])):
+        doc.embedding = vector
+        doc.trust_score = 0.8
+        doc.retrieval_score = 0.7
+        doc.freshness_score = 0.6
+
+    inducer = ThemeTokenInducer(ThemeTokenConfig())
+    asset_vector = np.asarray(embedder.embed(["search system"])[0], dtype=np.float32)
+    asset_tensor = torch.tensor(asset_vector, dtype=torch.float32, requires_grad=True)
+    output = inducer.forward_documents(docs, asset_vector=asset_tensor, embedder=embedder)
+    assert output is not None
+    loss = output.topic_latents.sum() + output.topic_scores.sum()
+    loss.backward()
+
+    assert inducer.state_space is not None
+    assert asset_tensor.grad is not None
+    assert float(asset_tensor.grad.abs().sum()) > 0.0
+    assert inducer.state_space.theme_vectors.grad is not None
+    assert float(inducer.state_space.theme_vectors.grad.abs().sum()) > 0.0
+    gradients = [parameter.grad for parameter in inducer.state_space.topic_decoder.parameters()]
+    assert gradients
+    assert any(gradient is not None and float(gradient.abs().sum()) > 0.0 for gradient in gradients)

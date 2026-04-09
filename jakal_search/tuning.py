@@ -11,9 +11,9 @@ import numpy as np
 
 from .config import EngineConfig
 from .embedding import SentenceTransformerEmbedder, TextEmbedder
-from .engine import SearchTreeEngine
+from .engine import RecursiveSearchEngine
 from .trust import SourceTrustScorer
-from .types import SearchDocument, SearchRequest, SearchTree
+from .types import SearchDocument, SearchRequest, SearchRun
 from .utils import normalize_rows
 
 
@@ -24,7 +24,7 @@ class BenchmarkCase:
     expected_topic_groups: tuple[tuple[str, ...], ...]
     forbidden_terms: tuple[str, ...] = ()
     preferred_sources: tuple[str, ...] = ()
-    expected_children: int = 2
+    expected_subtopics: int = 2
     expected_trusted_docs: int = 5
 
 
@@ -329,9 +329,9 @@ class CachingEmbedder:
 def default_tuning_config() -> EngineConfig:
     config = EngineConfig(transformer_device="auto")
     config.limits.max_depth = 2
-    config.limits.max_total_nodes = 10
+    config.limits.max_total_topics = 10
     config.limits.frontier_width = 4
-    config.limits.max_children_per_node = 2
+    config.limits.max_subtopics_per_topic = 2
     config.limits.min_results = 3
     config.limits.min_cluster_size = 3
     config.limits.results_per_query = 8
@@ -406,17 +406,17 @@ def evaluate_config(config: EngineConfig, embedder: TextEmbedder | None = None) 
     trust_evaluations: list[TrustEvaluation] = []
 
     for case in BENCHMARK_CASES:
-        engine = SearchTreeEngine(provider=provider, embedder=embedder, config=clone_config(config))
+        engine = RecursiveSearchEngine(provider=provider, embedder=embedder, config=clone_config(config))
         request = SearchRequest(
             query=case.query,
             max_depth=config.limits.max_depth,
-            max_total_nodes=config.limits.max_total_nodes,
+            max_total_topics=config.limits.max_total_topics,
             frontier_width=config.limits.frontier_width,
             results_per_query=config.limits.results_per_query,
             metadata={"benchmark_case": case.name},
         )
-        tree = engine.run(request)
-        evaluations.append(score_case(case, tree))
+        run = engine.run(request)
+        evaluations.append(score_case(case, run))
 
     for case in TRUST_BENCHMARK_CASES:
         trust_evaluations.append(score_trust_case(case, config, embedder))
@@ -430,12 +430,12 @@ def evaluate_config(config: EngineConfig, embedder: TextEmbedder | None = None) 
     )
 
 
-def score_case(case: BenchmarkCase, tree: SearchTree) -> CaseEvaluation:
-    root = tree.nodes[tree.root_id]
-    child_queries = [tree.nodes[child_id].query.lower() for child_id in root.children]
+def score_case(case: BenchmarkCase, run: SearchRun) -> CaseEvaluation:
+    root = run.topics[run.root_topic_id]
+    child_queries = [run.topics[child_id].query.lower() for child_id in root.child_topic_ids]
     kept_titles = [doc.title.lower() for doc in root.docs]
     kept_sources = [doc.source for doc in root.docs]
-    child_scores = [tree.nodes[child_id].score for child_id in root.children]
+    child_scores = [run.topics[child_id].score for child_id in root.child_topic_ids]
     retrieval_scores = [doc.retrieval_score for doc in root.docs]
     evidence_scores = [doc.passages[0].score for doc in root.docs if doc.passages]
 
@@ -443,7 +443,7 @@ def score_case(case: BenchmarkCase, tree: SearchTree) -> CaseEvaluation:
     if root.status == "expanded":
         score += 20.0
 
-    child_delta = abs(len(root.children) - case.expected_children)
+    child_delta = abs(len(root.child_topic_ids) - case.expected_subtopics)
     score += max(0.0, 15.0 - (child_delta * 7.5))
 
     for group in case.expected_topic_groups:

@@ -5,32 +5,30 @@ from collections import Counter
 from typing import Literal
 
 from .answering import compose_evidence_answer
-from .types import SearchDocument, SearchNode, SearchTree
+from .types import SearchDocument, SearchRun, SearchTopic
 from .utils import age_in_seconds, parse_iso_datetime
 
-OutputFormat = Literal["report", "urls", "tree", "json", "answer", "records"]
+OutputFormat = Literal["report", "urls", "json", "answer", "records"]
 
 
-def render_output(tree: SearchTree, output_format: OutputFormat) -> str:
+def render_output(run: SearchRun, output_format: OutputFormat) -> str:
     if output_format == "report":
-        return render_report(tree)
+        return render_report(run)
     if output_format == "urls":
-        return render_urls(tree)
-    if output_format == "tree":
-        return render_tree(tree)
+        return render_urls(run)
     if output_format == "json":
-        return render_json(tree)
+        return render_json(run)
     if output_format == "answer":
-        return render_answer(tree)
+        return render_answer(run)
     if output_format == "records":
-        return render_records(tree)
+        return render_records(run)
     raise ValueError(f"Unsupported output format: {output_format}")
 
 
-def render_report(tree: SearchTree) -> str:
-    root = tree.nodes[tree.root_id]
-    topics = _topic_nodes(tree)
-    documents = _unique_documents(tree)
+def render_report(run: SearchRun) -> str:
+    root = run.topics[run.root_topic_id]
+    topics = _topic_nodes(run)
+    documents = _unique_documents(run)
     source_counts = Counter(doc.source for doc in documents)
 
     lines = [f"Query: {root.query}", "", "Summary"]
@@ -84,63 +82,49 @@ def render_report(tree: SearchTree) -> str:
     return "\n".join(lines)
 
 
-def render_urls(tree: SearchTree) -> str:
-    return "\n".join(doc.url for doc in _unique_documents(tree))
+def render_urls(run: SearchRun) -> str:
+    return "\n".join(doc.url for doc in _unique_documents(run))
 
 
-def render_tree(tree: SearchTree) -> str:
-    lines: list[str] = []
-    ordered = sorted(tree.nodes.values(), key=lambda node: (node.depth, -node.score, node.node_id))
-    for node in ordered:
-        indent = "  " * node.depth
-        label = f" [{node.cluster_label}]" if node.cluster_label else ""
-        status = node.stop_reason or node.status
-        lines.append(f"{indent}- {node.node_id}: {node.query}{label} ({status}, score={node.score:.3f})")
-        if node.metrics:
-            metrics = ", ".join(f"{key}={value}" for key, value in node.metrics.items())
-            lines.append(f"{indent}  {metrics}")
-    return "\n".join(lines)
+def render_json(run: SearchRun) -> str:
+    return json.dumps(run.to_dict(), ensure_ascii=False, indent=2)
 
 
-def render_json(tree: SearchTree) -> str:
-    return json.dumps(tree.to_dict(), ensure_ascii=False, indent=2)
+def render_answer(run: SearchRun) -> str:
+    return compose_evidence_answer(run)
 
 
-def render_answer(tree: SearchTree) -> str:
-    return compose_evidence_answer(tree)
-
-
-def render_records(tree: SearchTree) -> str:
+def render_records(run: SearchRun) -> str:
     as_of = ""
-    if tree.request is not None:
-        as_of = str(tree.request.metadata.get("as_of") or "").strip()
-    memberships = _topic_memberships(tree)
+    if run.request is not None:
+        as_of = str(run.request.metadata.get("as_of") or "").strip()
+    memberships = _topic_memberships(run)
     records = [
         _document_record(
             doc,
-            tree.nodes[tree.root_id].query,
+            run.topics[run.root_topic_id].query,
             as_of=as_of or None,
             topic_memberships=memberships.get(doc.url, []),
         )
-        for doc in _unique_documents(tree)
+        for doc in _unique_documents(run)
     ]
     return json.dumps(records, ensure_ascii=False, indent=2)
 
 
-def _topic_nodes(tree: SearchTree) -> list[SearchNode]:
-    nodes = [node for node in tree.nodes.values() if node.node_id != tree.root_id and node.docs]
-    return sorted(nodes, key=lambda node: (-node.score, node.depth, node.node_id))
+def _topic_nodes(run: SearchRun) -> list[SearchTopic]:
+    topics = [topic for topic in run.topics.values() if topic.topic_id != run.root_topic_id and topic.docs]
+    return sorted(topics, key=lambda topic: (-topic.score, topic.depth, topic.topic_id))
 
 
-def _topic_name(node: SearchNode) -> str:
+def _topic_name(node: SearchTopic) -> str:
     return node.cluster_label or node.query
 
 
-def _unique_documents(tree: SearchTree) -> list[SearchDocument]:
+def _unique_documents(run: SearchRun) -> list[SearchDocument]:
     by_url: dict[str, SearchDocument] = {}
-    ordered_nodes = sorted(tree.nodes.values(), key=lambda node: (node.depth, -node.score, node.node_id))
-    for node in ordered_nodes:
-        for doc in node.docs:
+    ordered_topics = sorted(run.topics.values(), key=lambda topic: (topic.depth, -topic.score, topic.topic_id))
+    for topic in ordered_topics:
+        for doc in topic.docs:
             existing = by_url.get(doc.url)
             if existing is None or _doc_priority(doc) > _doc_priority(existing):
                 by_url[doc.url] = doc
@@ -161,7 +145,7 @@ def _top_documents(documents: list[SearchDocument], limit: int = 3) -> list[Sear
     )[:limit]
 
 
-def _metric(node: SearchNode, name: str) -> str:
+def _metric(node: SearchTopic, name: str) -> str:
     value = node.metrics.get(name)
     if isinstance(value, float):
         return f"{value:.3f}"
@@ -227,19 +211,19 @@ def _document_record(
     }
 
 
-def _topic_memberships(tree: SearchTree) -> dict[str, list[dict[str, object]]]:
+def _topic_memberships(run: SearchRun) -> dict[str, list[dict[str, object]]]:
     memberships: dict[str, list[dict[str, object]]] = {}
-    for node in _topic_nodes(tree):
-        if node.topic is None:
+    for topic in _topic_nodes(run):
+        if topic.topic is None:
             continue
         membership = {
-            "node_id": node.node_id,
-            "label": node.topic.label,
-            "query": node.topic.query,
-            "score": round(node.score, 6),
-            "keywords": list(node.topic.keywords),
-            "candidate_scores": list(node.topic.candidate_scores),
+            "topic_id": topic.topic_id,
+            "label": topic.topic.label,
+            "query": topic.topic.query,
+            "score": round(topic.score, 6),
+            "keywords": list(topic.topic.keywords),
+            "candidate_scores": list(topic.topic.candidate_scores),
         }
-        for doc in node.docs:
+        for doc in topic.docs:
             memberships.setdefault(doc.url, []).append(membership)
     return memberships

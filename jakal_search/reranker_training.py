@@ -168,15 +168,16 @@ def train_reranker(
     threshold, metrics = evaluate_model(model, val_x, val_y)
     output_dir.mkdir(parents=True, exist_ok=True)
     model_path = output_dir / "topic_reranker_head.pt"
-    torch.save(
-        {
-            "state_dict": model.state_dict(),
-            "input_dim": int(train_x.shape[1]),
-            "hidden_dim": hidden_dim,
-            "threshold": threshold,
-        },
-        model_path,
-    )
+    with model_path.open("wb") as handle:
+        torch.save(
+            {
+                "state_dict": model.state_dict(),
+                "input_dim": int(train_x.shape[1]),
+                "hidden_dim": hidden_dim,
+                "threshold": threshold,
+            },
+            handle,
+        )
     model_path.with_suffix(".json").write_text(
         json.dumps(
             {
